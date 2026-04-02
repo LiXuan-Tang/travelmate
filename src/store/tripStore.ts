@@ -13,6 +13,9 @@ interface TripState {
   addTrip: (trip: Trip) => void;
   updateTrip: (id: string, data: Partial<Trip>) => void;
   removeTrip: (id: string) => void;
+  addDestination: (destination: Destination) => void;
+  updateDestination: (id: string, data: Partial<Destination>) => void;
+  removeDestination: (id: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -32,6 +35,14 @@ export const useTripStore = create<TripState>((set) => ({
       trips: state.trips.map((t) => (t.id === id ? { ...t, ...data } : t)),
     })),
   removeTrip: (id) => set((state) => ({ trips: state.trips.filter((t) => t.id !== id) })),
+  addDestination: (destination) =>
+    set((state) => ({ destinations: [...state.destinations, destination] })),
+  updateDestination: (id, data) =>
+    set((state) => ({
+      destinations: state.destinations.map((d) => (d.id === id ? { ...d, ...data } : d)),
+    })),
+  removeDestination: (id) =>
+    set((state) => ({ destinations: state.destinations.filter((d) => d.id !== id) })),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
 }));

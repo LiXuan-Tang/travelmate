@@ -3,3 +3,4 @@ export { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription }
 export { Input } from './Input';
 export { Badge } from './Badge';
 export { Separator } from './Separator';
+export { DatePickerModal } from './DatePickerModal';

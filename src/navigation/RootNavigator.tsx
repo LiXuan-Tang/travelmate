@@ -7,6 +7,10 @@ import { useAuthStore } from '@store/authStore';
 import AuthNavigator from './AuthNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import EditProfileScreen from '@screens/profile/EditProfileScreen';
+import TripDetailScreen from '@screens/trips/TripDetailScreen';
+import TripFormScreen from '@screens/trips/TripFormScreen';
+import DestinationSearchScreen from '@screens/trips/DestinationSearchScreen';
+import ItineraryScreen from '@screens/trips/ItineraryScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -29,6 +33,26 @@ export default function RootNavigator() {
           <Stack.Screen
             name="EditProfile"
             component={EditProfileScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="TripDetail"
+            component={TripDetailScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="TripForm"
+            component={TripFormScreen}
+            options={{ animation: 'slide_from_bottom', presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name="DestinationSearch"
+            component={DestinationSearchScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="Itinerary"
+            component={ItineraryScreen}
             options={{ animation: 'slide_from_right' }}
           />
         </>

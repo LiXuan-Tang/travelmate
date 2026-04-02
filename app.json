@@ -32,7 +32,7 @@
     "plugins": [
       "expo-dev-client",
       "expo-web-browser",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
     ],
     "extra": {
       "eas": {
