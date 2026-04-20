@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -110,6 +110,46 @@ export default function TripDetailScreen({ route, navigation }: Props) {
     },
     [removeDestination],
   );
+
+  const tripDatesString = useMemo(() => {
+    if (!trip?.startDate?.seconds) return '';
+    const start = new Date(trip.startDate.seconds * 1000).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const end = trip.endDate?.seconds
+      ? new Date(trip.endDate.seconds * 1000).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      : start;
+    return `${start} – ${end}`;
+  }, [trip]);
+
+  const aiDestinationName = useMemo(
+    () => destinations[0]?.name ?? trip?.title ?? 'the destination',
+    [destinations, trip],
+  );
+
+  const handleAISuggestions = useCallback(() => {
+    navigation.navigate('AIRecommendations', {
+      tripId,
+      destination: aiDestinationName,
+      tripDates: tripDatesString,
+      preferences: [],
+    });
+  }, [navigation, tripId, aiDestinationName, tripDatesString]);
+
+  const handleAIChat = useCallback(() => {
+    navigation.navigate('AIChat', {
+      tripId,
+      destination: aiDestinationName,
+      tripDates: tripDatesString,
+      preferences: [],
+    });
+  }, [navigation, tripId, aiDestinationName, tripDatesString]);
 
   const handleDelete = useCallback(() => {
     Alert.alert(
@@ -290,6 +330,36 @@ export default function TripDetailScreen({ route, navigation }: Props) {
                 </Button>
               </View>
             )}
+          </View>
+
+          {/* AI Features */}
+          <View className="mb-6">
+            <Text className="text-base font-bold text-foreground mb-3">AI Assistant</Text>
+            <View className="flex-row gap-x-3">
+              <TouchableOpacity
+                onPress={handleAISuggestions}
+                activeOpacity={0.8}
+                className="flex-1 bg-primary rounded-2xl p-4 items-center"
+              >
+                <Text className="text-2xl mb-1">🤖</Text>
+                <Text className="text-sm font-semibold text-white">AI Suggestions</Text>
+                <Text className="text-xs text-white/70 mt-0.5 text-center">
+                  Places curated for you
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleAIChat}
+                activeOpacity={0.8}
+                className="flex-1 bg-surface border border-border rounded-2xl p-4 items-center"
+              >
+                <Text className="text-2xl mb-1">💬</Text>
+                <Text className="text-sm font-semibold text-foreground">AI Assistant</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5 text-center">
+                  Ask about your trip
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Delete button */}

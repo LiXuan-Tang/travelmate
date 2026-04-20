@@ -32,11 +32,24 @@ service cloud.firestore {
         (resource.data.visibility == 'public' ||
          resource.data.authorId == request.auth.uid);
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null &&
+      // Authors can update everything; any signed-in user can update likesCount
+      // (e.g. when liking/unliking a post)
+      allow update: if request.auth != null && (
+        resource.data.authorId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount'])
+      );
+      allow delete: if request.auth != null &&
         resource.data.authorId == request.auth.uid;
+
+      // Comments subcollection: any signed-in user can read/create; only author can delete
+      match /comments/{commentId} {
+        allow read, create: if request.auth != null;
+        allow delete: if request.auth != null &&
+          resource.data.authorId == request.auth.uid;
+      }
     }
 
-    // Comments: any signed-in user can read/create; only author can delete
+    // Top-level comments collection (legacy — kept for safety)
     match /comments/{commentId} {
       allow read, create: if request.auth != null;
       allow delete: if request.auth != null &&

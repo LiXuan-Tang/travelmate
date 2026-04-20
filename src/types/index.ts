@@ -10,6 +10,8 @@ export interface UserProfile {
   photoURL: string | null;
   bio: string;
   isAdmin: boolean;
+  likedPostIds?: string[];
+  savedPostIds?: string[];
   createdAt: Timestamp;
   updatedAt?: Timestamp;
 }
@@ -73,6 +75,52 @@ export interface Comment {
   createdAt: Timestamp;
 }
 
+// ─── AI Recommendations ───────────────────────────────────────────────────────
+
+export interface AISuggestion {
+  name: string;
+  description: string;
+  reason: string;
+  category: string;
+  estimatedTime: string;
+  bestTime: string;
+  lat: number;
+  lng: number;
+}
+
+export interface DayPlanActivity {
+  time: 'morning' | 'afternoon' | 'evening' | string;
+  name: string;
+  description: string;
+  estimatedTime: string;
+}
+
+export interface DayPlan {
+  day: number;
+  activities: DayPlanActivity[];
+}
+
+export interface OptimizedDay {
+  day: number;
+  places: { name: string }[];
+}
+
+export interface OptimizedTrip {
+  days: OptimizedDay[];
+}
+
+export interface BestDaySuggestion {
+  bestDay: number;
+  reason: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  timestamp: number;
+}
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 export type AuthStackParamList = {
@@ -93,9 +141,21 @@ export type RootStackParamList = {
   EditProfile: undefined;
   TripDetail: { tripId: string };
   TripForm: { tripId?: string };
-  DestinationSearch: { tripId: string };
+  DestinationSearch: { tripId: string; targetDate?: string };
   Itinerary: { tripId: string };
   PostDetail: { postId: string };
   PostForm: { postId?: string };
   AdminDashboard: undefined;
+  AIRecommendations: {
+    tripId: string;
+    destination: string;
+    tripDates: string;
+    preferences: string[];
+  };
+  AIChat: {
+    tripId: string;
+    destination: string;
+    tripDates: string;
+    preferences: string[];
+  };
 };

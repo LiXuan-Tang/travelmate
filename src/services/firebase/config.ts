@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -12,12 +12,29 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// #region agent log
-console.log('[TravelMate][H_I] Firebase apiKey prefix (post-fix):', (firebaseConfig.apiKey ?? '').slice(0, 15) + '…');
-// #endregion
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Capture whether this is the first initialization BEFORE calling initializeApp,
+// so we know whether to call initializeAuth (first time) vs getAuth (hot reload).
+const isFirstInit = getApps().length === 0;
+const app = isFirstInit ? initializeApp(firebaseConfig) : getApp();
 
-export const auth = getAuth(app);
+function createAuth() {
+  try {
+    // Lazily require AsyncStorage so the app does not crash if the native
+    // module hasn't been compiled into the build yet (e.g. before running
+    // `npx expo run:android`). When the module is available, auth state will
+    // persist across app restarts; otherwise it falls back to memory-only.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    if (AsyncStorage) {
+      return initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+    }
+  } catch {
+    // Native module not compiled into this build — use memory persistence.
+  }
+  return getAuth(app);
+}
+
+export const auth = isFirstInit ? createAuth() : getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 

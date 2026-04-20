@@ -29,9 +29,30 @@ import {
 type Props = NativeStackScreenProps<RootStackParamList, 'DestinationSearch'>;
 
 export default function DestinationSearchScreen({ route, navigation }: Props) {
-  const { tripId } = route.params;
+  const { tripId, targetDate } = route.params;
   const trip = useTripStore((s) => s.trips.find((t) => t.id === tripId));
   const { destinations, addDestination, isLoading: isSaving } = useDestinations(tripId);
+
+  // Resolve the timestamp to use when saving a new destination.
+  // Priority: targetDate param → trip start date → now
+  const resolvedDateTimestamp = React.useMemo(() => {
+    if (targetDate) {
+      const [y, m, d] = targetDate.split('-').map(Number);
+      return Timestamp.fromDate(new Date(y, m - 1, d));
+    }
+    if (trip?.startDate) return trip.startDate;
+    return Timestamp.now();
+  }, [targetDate, trip?.startDate]);
+
+  // Human-readable label shown in the header subtitle
+  const dayLabel = React.useMemo(() => {
+    if (!targetDate) return trip?.title ?? null;
+    const [y, m, d] = targetDate.split('-').map(Number);
+    const formatted = new Date(y, m - 1, d).toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+    });
+    return trip?.title ? `${trip.title} · ${formatted}` : formatted;
+  }, [targetDate, trip?.title]);
 
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
@@ -98,7 +119,7 @@ export default function DestinationSearchScreen({ route, navigation }: Props) {
       lat: selectedPlace.lat,
       lng: selectedPlace.lng,
       photoReference: selectedPlace.photoReference,
-      date: Timestamp.now(),
+      date: resolvedDateTimestamp,
       notes: '',
       order: destinations.length,
     });
@@ -108,7 +129,7 @@ export default function DestinationSearchScreen({ route, navigation }: Props) {
     } else {
       Alert.alert('Error', 'Failed to save destination. Please try again.');
     }
-  }, [selectedPlace, destinations.length, addDestination, navigation]);
+  }, [selectedPlace, destinations.length, addDestination, navigation, resolvedDateTimestamp]);
 
   const renderPrediction = ({ item }: { item: PlacePrediction }) => (
     <TouchableOpacity
@@ -149,9 +170,9 @@ export default function DestinationSearchScreen({ route, navigation }: Props) {
         </TouchableOpacity>
         <View className="flex-1">
           <Text className="text-base font-bold text-foreground">Add Destination</Text>
-          {trip?.title ? (
+          {dayLabel ? (
             <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-              {trip.title}
+              {dayLabel}
             </Text>
           ) : null}
         </View>

@@ -1,4 +1,4 @@
-const PLACES_BASE = 'https://maps.googleapis.com/maps/api/place';
+const PLACES_BASE = 'https://places.googleapis.com/v1';
 
 export interface PlacePrediction {
   placeId: string;
@@ -21,49 +21,91 @@ export const searchPlaces = async (input: string): Promise<PlacePrediction[]> =>
   const key = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY;
   if (!key) throw new Error('Missing EXPO_PUBLIC_GOOGLE_PLACES_API_KEY');
 
-  const url = `${PLACES_BASE}/autocomplete/json?input=${encodeURIComponent(input)}&key=${key}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Places autocomplete failed: ${res.status}`);
-
+  const res = await fetch(`${PLACES_BASE}/places:autocomplete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key },
+    body: JSON.stringify({ input }),
+  });
   const json = await res.json();
-  if (json.status !== 'OK' && json.status !== 'ZERO_RESULTS') {
-    throw new Error(`Places API error: ${json.status}`);
-  }
+  if (!res.ok) throw new Error(`Places autocomplete failed: ${res.status} — ${json.error?.message ?? JSON.stringify(json)}`);
+  if (json.error) throw new Error(`Places API error: ${json.error.message}`);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (json.predictions ?? []).map((p: any) => ({
-    placeId: p.place_id,
-    description: p.description,
-    mainText: p.structured_formatting?.main_text ?? p.description,
-    secondaryText: p.structured_formatting?.secondary_text ?? '',
-  }));
+  return (json.suggestions ?? []).map((s: any) => {
+    const pp = s.placePrediction;
+    return {
+      placeId: pp.placeId,
+      description: pp.text?.text ?? '',
+      mainText: pp.structuredFormat?.mainText?.text ?? pp.text?.text ?? '',
+      secondaryText: pp.structuredFormat?.secondaryText?.text ?? '',
+    };
+  });
 };
 
 export const fetchPlaceDetails = async (placeId: string): Promise<PlaceDetail> => {
   const key = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY;
   if (!key) throw new Error('Missing EXPO_PUBLIC_GOOGLE_PLACES_API_KEY');
 
-  const fields = 'name,formatted_address,geometry,photos,rating';
-  const url = `${PLACES_BASE}/details/json?place_id=${encodeURIComponent(placeId)}&fields=${fields}&key=${key}`;
-  const res = await fetch(url);
+  const res = await fetch(`${PLACES_BASE}/places/${encodeURIComponent(placeId)}`, {
+    headers: {
+      'X-Goog-Api-Key': key,
+      'X-Goog-FieldMask': 'id,displayName,formattedAddress,location,photos,rating',
+    },
+  });
   if (!res.ok) throw new Error(`Places details failed: ${res.status}`);
 
   const json = await res.json();
-  if (json.status !== 'OK') throw new Error(`Places details API error: ${json.status}`);
+  if (json.error) throw new Error(`Places details API error: ${json.error.message}`);
 
-  const result = json.result;
   return {
     placeId,
-    name: result.name,
-    address: result.formatted_address,
-    lat: result.geometry.location.lat,
-    lng: result.geometry.location.lng,
-    photoReference: result.photos?.[0]?.photo_reference ?? null,
-    rating: result.rating,
+    name: json.displayName?.text ?? '',
+    address: json.formattedAddress ?? '',
+    lat: json.location?.latitude ?? 0,
+    lng: json.location?.longitude ?? 0,
+    photoReference: json.photos?.[0]?.name ?? null,
+    rating: json.rating,
   };
 };
 
 export const getPhotoUrl = (photoReference: string, maxWidth = 400): string => {
   const key = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY;
-  return `${PLACES_BASE}/photo?maxwidth=${maxWidth}&photo_reference=${encodeURIComponent(photoReference)}&key=${key}`;
+  return `${PLACES_BASE}/${photoReference}/media?maxWidthPx=${maxWidth}&key=${key}`;
+};
+
+export interface PlacePhotoResult {
+  url: string | null;
+  photoRef: string | null;
+}
+
+/**
+ * Searches for a place by text query and returns both the display URL and the
+ * raw photo reference (needed to persist in Destination.photoReference so the
+ * itinerary screen can reconstruct the URL via getPhotoUrl).
+ */
+export const searchPlacePhoto = async (
+  query: string,
+  maxWidth = 600,
+): Promise<PlacePhotoResult> => {
+  const key = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY;
+  if (!key) return { url: null, photoRef: null };
+
+  try {
+    const res = await fetch(`${PLACES_BASE}/places:searchText`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': 'places.photos',
+      },
+      body: JSON.stringify({ textQuery: query }),
+    });
+    if (!res.ok) return { url: null, photoRef: null };
+    const json = await res.json();
+    const photoRef: string | undefined = json.places?.[0]?.photos?.[0]?.name;
+    if (!photoRef) return { url: null, photoRef: null };
+    return { url: getPhotoUrl(photoRef, maxWidth), photoRef };
+  } catch {
+    return { url: null, photoRef: null };
+  }
 };

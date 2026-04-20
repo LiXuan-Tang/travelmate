@@ -11,6 +11,10 @@ import TripDetailScreen from '@screens/trips/TripDetailScreen';
 import TripFormScreen from '@screens/trips/TripFormScreen';
 import DestinationSearchScreen from '@screens/trips/DestinationSearchScreen';
 import ItineraryScreen from '@screens/trips/ItineraryScreen';
+import AIRecommendationsScreen from '@screens/trips/AIRecommendationsScreen';
+import AIChatScreen from '@screens/trips/AIChatScreen';
+import PostDetailScreen from '@screens/trips/PostDetailScreen';
+import PostFormScreen from '@screens/trips/PostFormScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -54,6 +58,26 @@ export default function RootNavigator() {
             name="Itinerary"
             component={ItineraryScreen}
             options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="AIRecommendations"
+            component={AIRecommendationsScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="AIChat"
+            component={AIChatScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="PostDetail"
+            component={PostDetailScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="PostForm"
+            component={PostFormScreen}
+            options={{ animation: 'slide_from_bottom', presentation: 'modal' }}
           />
         </>
       ) : (
