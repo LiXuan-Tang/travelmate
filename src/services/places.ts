@@ -78,6 +78,54 @@ export interface PlacePhotoResult {
   photoRef: string | null;
 }
 
+export interface TextSearchPlace {
+  placeId: string;
+  name: string;
+  address: string;
+  photoReference: string | null;
+  rating?: number;
+  lat: number;
+  lng: number;
+}
+
+/**
+ * Full text search returning rich place results (name, address, rating, photo).
+ * Used for category browsing on the Explore screen.
+ */
+export const searchTextPlaces = async (
+  query: string,
+  maxResults = 10,
+): Promise<TextSearchPlace[]> => {
+  const key = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY;
+  if (!key) return [];
+
+  try {
+    const res = await fetch(`${PLACES_BASE}/places:searchText`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.photos,places.rating',
+      },
+      body: JSON.stringify({ textQuery: query, pageSize: maxResults }),
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (json.places ?? []).map((p: any) => ({
+      placeId: p.id,
+      name: p.displayName?.text ?? '',
+      address: p.formattedAddress ?? '',
+      photoReference: p.photos?.[0]?.name ?? null,
+      rating: p.rating,
+      lat: p.location?.latitude ?? 0,
+      lng: p.location?.longitude ?? 0,
+    }));
+  } catch {
+    return [];
+  }
+};
+
 /**
  * Searches for a place by text query and returns both the display URL and the
  * raw photo reference (needed to persist in Destination.photoReference so the

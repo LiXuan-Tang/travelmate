@@ -158,4 +158,5 @@ export type RootStackParamList = {
     tripDates: string;
     preferences: string[];
   };
+  AIIdeas: undefined;
 };

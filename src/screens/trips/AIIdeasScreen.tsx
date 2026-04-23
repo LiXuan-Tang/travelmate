@@ -14,16 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, ChatMessage } from '@app-types/index';
 import { useAIChat } from '@hooks/useAI';
-import { useTripStore } from '@store/tripStore';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'AIChat'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'AIIdeas'>;
 
-// ─── Markdown helpers ─────────────────────────────────────────────────────────
+// ─── Markdown helpers (same renderer as AIChatScreen) ─────────────────────────
 
-/**
- * Splits a line into alternating plain strings and bold/italic <Text> spans.
- * Children inherit color from their parent <Text>.
- */
 function renderInline(text: string): React.ReactNode[] {
   const regex = /\*\*(.+?)\*\*|\*(.+?)\*/g;
   const nodes: React.ReactNode[] = [];
@@ -32,9 +27,7 @@ function renderInline(text: string): React.ReactNode[] {
   let key = 0;
 
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index));
-    }
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
     if (match[1] !== undefined) {
       nodes.push(
         <Text key={key++} style={{ fontWeight: '700' }}>
@@ -50,12 +43,10 @@ function renderInline(text: string): React.ReactNode[] {
     }
     lastIndex = match.index + match[0].length;
   }
-
   if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
   return nodes.length > 0 ? nodes : [text];
 }
 
-/** Renders assistant markdown text as structured blocks. */
 function MarkdownBody({ text }: { text: string }) {
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
@@ -63,18 +54,14 @@ function MarkdownBody({ text }: { text: string }) {
 
   lines.forEach((raw, i) => {
     const line = raw.trim();
-
     if (line === '') {
       consecutiveEmpty++;
-      // One blank line between blocks — add a small gap (skip duplicates)
-      if (consecutiveEmpty === 1 && elements.length > 0) {
+      if (consecutiveEmpty === 1 && elements.length > 0)
         elements.push(<View key={`gap-${i}`} style={{ height: 6 }} />);
-      }
       return;
     }
     consecutiveEmpty = 0;
 
-    // Heading: # / ## / ###
     const headingMatch = line.match(/^(#{1,3})\s+(.+)/);
     if (headingMatch) {
       const level = headingMatch[1].length;
@@ -95,13 +82,12 @@ function MarkdownBody({ text }: { text: string }) {
       return;
     }
 
-    // Bullet: - item / * item / • item
     const bulletMatch = line.match(/^[-*•]\s+(.+)/);
     if (bulletMatch) {
       elements.push(
         <View key={i} style={{ flexDirection: 'row', marginBottom: 2 }}>
           <Text className="text-foreground" style={{ fontSize: 14, lineHeight: 20, marginRight: 6 }}>
-            {'•'}
+            •
           </Text>
           <Text className="text-foreground" style={{ fontSize: 14, lineHeight: 20, flex: 1 }}>
             {renderInline(bulletMatch[1])}
@@ -111,7 +97,6 @@ function MarkdownBody({ text }: { text: string }) {
       return;
     }
 
-    // Numbered list: 1. item
     const numberedMatch = line.match(/^(\d+)\.\s+(.+)/);
     if (numberedMatch) {
       elements.push(
@@ -127,7 +112,6 @@ function MarkdownBody({ text }: { text: string }) {
       return;
     }
 
-    // Plain paragraph line
     elements.push(
       <Text key={i} className="text-foreground" style={{ fontSize: 14, lineHeight: 20 }}>
         {renderInline(line)}
@@ -142,11 +126,8 @@ function MarkdownBody({ text }: { text: string }) {
 
 function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user';
-
   return (
-    <View
-      className={`mb-3 max-w-[85%] ${isUser ? 'self-end items-end' : 'self-start items-start'}`}
-    >
+    <View className={`mb-3 max-w-[85%] ${isUser ? 'self-end items-end' : 'self-start items-start'}`}>
       {!isUser && (
         <View className="flex-row items-center mb-1">
           <View className="w-5 h-5 rounded-full bg-primary items-center justify-center mr-1">
@@ -157,7 +138,6 @@ function ChatBubble({ message }: { message: ChatMessage }) {
           <Text className="text-xs text-muted-foreground font-medium">TravelMate AI</Text>
         </View>
       )}
-
       <View
         className={`rounded-2xl px-4 py-3 ${
           isUser
@@ -175,8 +155,6 @@ function ChatBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-// ─── Typing Indicator ─────────────────────────────────────────────────────────
-
 function TypingIndicator() {
   return (
     <View className="self-start mb-3">
@@ -192,18 +170,16 @@ function TypingIndicator() {
 // ─── Suggestion Chips ─────────────────────────────────────────────────────────
 
 const SUGGESTION_CHIPS = [
-  'What should I pack?',
-  'Best local food to try?',
-  'Hidden gems nearby?',
-  'Safety tips for tourists?',
-  'Best time to visit popular spots?',
+  'Where should I travel next?',
+  'Best destinations on a budget',
+  'Hidden gems in Southeast Asia',
+  'Solo travel tips for beginners',
+  'Top beach destinations worldwide',
+  'Best time to visit Japan',
+  'Family-friendly travel ideas',
 ];
 
-interface SuggestionChipsProps {
-  onSelect: (text: string) => void;
-}
-
-function SuggestionChips({ onSelect }: SuggestionChipsProps) {
+function SuggestionChips({ onSelect }: { onSelect: (text: string) => void }) {
   return (
     <ScrollView
       horizontal
@@ -224,30 +200,43 @@ function SuggestionChips({ onSelect }: SuggestionChipsProps) {
   );
 }
 
+// ─── Welcome card ─────────────────────────────────────────────────────────────
+
+function WelcomeCard() {
+  return (
+    <View className="flex-1 items-center justify-center px-8">
+      <View className="w-14 h-14 rounded-2xl bg-primary-light items-center justify-center mb-4">
+        <Text style={{ fontSize: 28 }}>✨</Text>
+      </View>
+      <Text className="text-base font-bold text-foreground mb-2 text-center">
+        Your AI Travel Assistant
+      </Text>
+      <Text className="text-sm text-muted-foreground text-center leading-5">
+        Ask me anything — destinations, itineraries, packing tips, budget ideas, and more. I'm here
+        to inspire your next adventure.
+      </Text>
+    </View>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
-export default function AIChatScreen({ route, navigation }: Props) {
-  const { tripId, destination, tripDates, preferences } = route.params;
+const GENERAL_CHAT_ID = '__ai_ideas__';
 
-  const { destinations } = useTripStore();
-  const existingPlan = destinations.map((d) => d.name);
-
-  const { messages, isLoading, sendMessage } = useAIChat(tripId, {
-    destination,
-    tripDates,
-    preferences,
-    existingPlan,
+export default function AIIdeasScreen({ navigation }: Props) {
+  const { messages, isLoading, sendMessage } = useAIChat(GENERAL_CHAT_ID, {
+    destination: '',
+    tripDates: '',
+    preferences: [],
+    existingPlan: [],
   });
 
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
-  // Scroll to bottom whenever messages change
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => {
-        listRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
   }, [messages.length]);
 
@@ -273,39 +262,22 @@ export default function AIChatScreen({ route, navigation }: Props) {
         <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <Text className="text-base font-bold text-foreground">←</Text>
         </TouchableOpacity>
-
         <View className="flex-1 mx-4">
-          <Text className="text-base font-bold text-foreground" numberOfLines={1}>
-            AI Assistant
-          </Text>
-          <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-            {destination} · {tripDates}
-          </Text>
+          <Text className="text-base font-bold text-foreground">AI Ideas</Text>
+          <Text className="text-xs text-muted-foreground">General travel assistant</Text>
         </View>
-
-        {/* Context badge */}
         <View className="bg-primary-light rounded-full px-2.5 py-1">
-          <Text className="text-xs font-medium text-primary">Context ON</Text>
+          <Text className="text-xs font-medium text-primary">✨ AI</Text>
         </View>
       </View>
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
-        {/* Messages list */}
         {messages.length === 0 ? (
-          <View className="flex-1 items-center justify-center px-8">
-            <Text className="text-base font-bold text-foreground mb-2 text-center">
-              Ask me anything about your trip
-            </Text>
-            <Text className="text-sm text-muted-foreground text-center leading-5">
-              I already know you're travelling to{' '}
-              <Text className="font-semibold text-foreground">{destination}</Text> on{' '}
-              <Text className="font-semibold text-foreground">{tripDates}</Text>.
-            </Text>
-          </View>
+          <WelcomeCard />
         ) : (
           <FlatList
             ref={listRef}
@@ -318,15 +290,13 @@ export default function AIChatScreen({ route, navigation }: Props) {
           />
         )}
 
-        {/* Chips + input bar grouped so chips always sit flush above the bar */}
         <View>
           {messages.length === 0 && <SuggestionChips onSelect={handleChipSelect} />}
 
-          {/* Input bar */}
           <View className="flex-row items-end px-4 py-3 border-t border-border bg-surface gap-2">
             <TextInput
               className="flex-1 bg-muted rounded-2xl px-4 py-3 text-sm text-foreground"
-              placeholder="Ask about your trip…"
+              placeholder="Ask me about travel ideas…"
               placeholderTextColor="#9CA3AF"
               value={input}
               onChangeText={setInput}

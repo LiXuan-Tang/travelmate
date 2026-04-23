@@ -129,7 +129,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
   }, [trip]);
 
   const aiDestinationName = useMemo(
-    () => destinations[0]?.name ?? trip?.title ?? 'the destination',
+    () => trip?.title ?? destinations[0]?.name ?? 'the destination',
     [destinations, trip],
   );
 
@@ -335,31 +335,32 @@ export default function TripDetailScreen({ route, navigation }: Props) {
           {/* AI Features */}
           <View className="mb-6">
             <Text className="text-base font-bold text-foreground mb-3">AI Assistant</Text>
-            <View className="flex-row gap-x-3">
-              <TouchableOpacity
-                onPress={handleAISuggestions}
-                activeOpacity={0.8}
-                className="flex-1 bg-primary rounded-2xl p-4 items-center"
-              >
-                <Text className="text-2xl mb-1">🤖</Text>
-                <Text className="text-sm font-semibold text-white">AI Suggestions</Text>
-                <Text className="text-xs text-white/70 mt-0.5 text-center">
-                  Places curated for you
-                </Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleAIChat}
-                activeOpacity={0.8}
-                className="flex-1 bg-surface border border-border rounded-2xl p-4 items-center"
-              >
-                <Text className="text-2xl mb-1">💬</Text>
-                <Text className="text-sm font-semibold text-foreground">AI Assistant</Text>
-                <Text className="text-xs text-muted-foreground mt-0.5 text-center">
-                  Ask about your trip
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              onPress={handleAISuggestions}
+              activeOpacity={0.8}
+              className="bg-primary rounded-2xl px-4 py-3 flex-row items-center mb-3"
+            >
+              <Text className="text-xl mr-3">🤖</Text>
+              <View className="flex-1">
+                <Text className="text-sm font-semibold text-white">AI Suggestions</Text>
+                <Text className="text-xs text-white/70 mt-0.5">Places curated for you</Text>
+              </View>
+              <Text className="text-white/60 text-base">›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleAIChat}
+              activeOpacity={0.8}
+              className="bg-surface border border-border rounded-2xl px-4 py-3 flex-row items-center"
+            >
+              <Text className="text-xl mr-3">💬</Text>
+              <View className="flex-1">
+                <Text className="text-sm font-semibold text-foreground">Ask AI Assistant</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">Chat about your trip</Text>
+              </View>
+              <Text className="text-muted-foreground text-base">›</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Delete button */}

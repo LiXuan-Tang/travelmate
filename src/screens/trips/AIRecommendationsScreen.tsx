@@ -263,9 +263,35 @@ export default function AIRecommendationsScreen({ route, navigation }: Props) {
     [destinations],
   );
 
+  // Serialise itineraryByDay as day → string[] for the suggestions API
+  const itineraryByDayNames = useMemo<Record<string, string[]>>(() => {
+    const result: Record<string, string[]> = {};
+    for (const [day, places] of Object.entries(itineraryByDay)) {
+      result[day] = places.map((p) => p.name);
+    }
+    return result;
+  }, [itineraryByDay]);
+
+  // Derive categories already represented from suggestions that were added to the itinerary
+  const existingCategories = useMemo(() => {
+    const addedNames = new Set(existingPlanNames);
+    return [
+      ...new Set(
+        suggestions.filter((s) => addedNames.has(s.name)).map((s) => s.category),
+      ),
+    ];
+  }, [suggestions, existingPlanNames]);
+
   // Auto-fetch on mount
   useEffect(() => {
-    fetchSuggestions({ destination, tripDates, preferences, existingPlan: existingPlanNames });
+    fetchSuggestions({
+      destination,
+      tripDates,
+      preferences,
+      existingPlan: existingPlanNames,
+      itineraryByDay: itineraryByDayNames,
+      existingCategories,
+    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch cover photos for each suggestion after they load
@@ -301,10 +327,6 @@ export default function AIRecommendationsScreen({ route, navigation }: Props) {
   // When selected day changes inside modal, fetch plan
   const handleSelectDay = useCallback(
     (day: number) => {
-      // #region agent log
-      const _dayPlaces = itineraryByDay[`Day ${day}`]?.map((p) => p.name) ?? [];
-      fetch('http://127.0.0.1:7458/ingest/575753d7-1369-4343-91b5-6ed35c9c2611',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'04f502'},body:JSON.stringify({sessionId:'04f502',runId:'post-fix',location:'AIRecommendationsScreen.tsx:handleSelectDay',message:'POST-FIX: Day plan request',data:{day,existingPlacesOnDay:_dayPlaces,allExistingCount:existingPlanNames.length},timestamp:Date.now(),hypothesisId:'H-D,H-E,H-F'})}).catch(()=>{});
-      // #endregion
       setSelectedDay(day);
       setAddedActivityNames(new Set());
       const existingPlacesOnDay = itineraryByDay[`Day ${day}`]?.map((p) => p.name) ?? [];
@@ -397,9 +419,6 @@ export default function AIRecommendationsScreen({ route, navigation }: Props) {
   // Add to Itinerary flow
   const handleAddToItinerary = useCallback(
     async (suggestion: AISuggestion) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7458/ingest/575753d7-1369-4343-91b5-6ed35c9c2611',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'04f502'},body:JSON.stringify({sessionId:'04f502',runId:'post-fix',location:'AIRecommendationsScreen.tsx:handleAddToItinerary',message:'POST-FIX: Adding suggestion',data:{name:suggestion.name,photoRef:photoRefMap[suggestion.name]??null,hasPhotoRef:!!(photoRefMap[suggestion.name])},timestamp:Date.now(),hypothesisId:'H-A,H-B'})}).catch(()=>{});
-      // #endregion
       setAddingId(suggestion.name);
       try {
         const bestDay = await bestDayHook.fetchBestDay({
@@ -454,8 +473,15 @@ export default function AIRecommendationsScreen({ route, navigation }: Props) {
   );
 
   const handleRefresh = useCallback(() => {
-    fetchSuggestions({ destination, tripDates, preferences, existingPlan: existingPlanNames });
-  }, [destination, tripDates, preferences, existingPlanNames, fetchSuggestions]);
+    fetchSuggestions({
+      destination,
+      tripDates,
+      preferences,
+      existingPlan: existingPlanNames,
+      itineraryByDay: itineraryByDayNames,
+      existingCategories,
+    });
+  }, [destination, tripDates, preferences, existingPlanNames, itineraryByDayNames, existingCategories, fetchSuggestions]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>

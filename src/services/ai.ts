@@ -16,6 +16,8 @@ export interface GenerateSuggestionsParams {
   tripDates: string;
   preferences: string[];
   existingPlan: string[];
+  itineraryByDay?: Record<string, string[]>;
+  existingCategories?: string[];
 }
 
 export interface GenerateDayPlanParams {

@@ -13,6 +13,7 @@ import DestinationSearchScreen from '@screens/trips/DestinationSearchScreen';
 import ItineraryScreen from '@screens/trips/ItineraryScreen';
 import AIRecommendationsScreen from '@screens/trips/AIRecommendationsScreen';
 import AIChatScreen from '@screens/trips/AIChatScreen';
+import AIIdeasScreen from '@screens/trips/AIIdeasScreen';
 import PostDetailScreen from '@screens/trips/PostDetailScreen';
 import PostFormScreen from '@screens/trips/PostFormScreen';
 
@@ -68,6 +69,11 @@ export default function RootNavigator() {
             name="AIChat"
             component={AIChatScreen}
             options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="AIIdeas"
+            component={AIIdeasScreen}
+            options={{ animation: 'slide_from_bottom', presentation: 'modal' }}
           />
           <Stack.Screen
             name="PostDetail"

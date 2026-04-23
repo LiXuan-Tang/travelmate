@@ -9,16 +9,10 @@ function getGemini() {
   return new GoogleGenerativeAI(key).getGenerativeModel({ model: 'gemini-2.5-flash' });
 }
 
-// ─── Shared helper ────────────────────────────────────────────────────────────
+// ─── Shared helpers ───────────────────────────────────────────────────────────
 
-async function callGemini(prompt: string): Promise<unknown> {
-  const model = getGemini();
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
-
-  // Strip markdown code fences if Gemini wraps output in ```json ... ```
-  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-
+function parseGeminiText(text: string): unknown {
+  const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   try {
     return JSON.parse(cleaned);
   } catch {
@@ -27,6 +21,22 @@ async function callGemini(prompt: string): Promise<unknown> {
       `Gemini returned non-JSON response: ${cleaned.slice(0, 200)}`,
     );
   }
+}
+
+async function callGemini(prompt: string): Promise<unknown> {
+  const model = getGemini();
+  const result = await model.generateContent(prompt);
+  return parseGeminiText(result.response.text());
+}
+
+// Higher temperature variant used for suggestions — produces more varied output.
+async function callGeminiCreative(prompt: string): Promise<unknown> {
+  const model = getGemini();
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 1.0 },
+  });
+  return parseGeminiText(result.response.text());
 }
 
 // ─── Type guards ─────────────────────────────────────────────────────────────
@@ -59,20 +69,47 @@ export const generateSuggestions = onCall({ invoker: 'public' }, async (request)
   const tripDates = requireString(data.tripDates, 'tripDates');
   const preferences = requireStringArray(data.preferences ?? [], 'preferences');
   const existingPlan = requireStringArray(data.existingPlan ?? [], 'existingPlan');
+  const existingCategories = requireStringArray(data.existingCategories ?? [], 'existingCategories');
 
-  const prompt = `You are a travel expert. Suggest 5 diverse attractions for a trip to ${destination}.
+  // Parse the optional itineraryByDay map (day label → place name[])
+  let itineraryByDay: Record<string, string[]> = {};
+  if (typeof data.itineraryByDay === 'object' && data.itineraryByDay !== null) {
+    for (const [day, places] of Object.entries(data.itineraryByDay as Record<string, unknown>)) {
+      if (Array.isArray(places)) {
+        itineraryByDay[day] = (places as unknown[]).filter((p) => typeof p === 'string') as string[];
+      }
+    }
+  }
+
+  const hasItinerary = Object.keys(itineraryByDay).length > 0;
+
+  const itinerarySummary = hasItinerary
+    ? Object.entries(itineraryByDay)
+        .map(([day, places]) => `  ${day}: ${places.join(', ') || '(empty)'}`)
+        .join('\n')
+    : '  (no places scheduled yet)';
+
+  const prompt = `You are a travel expert helping plan a trip to ${destination}.
 Trip dates: ${tripDates}.
 User preferences: ${preferences.join(', ') || 'none'}.
 
-ALREADY IN ITINERARY — do NOT suggest any of these:
+CURRENT ITINERARY BY DAY:
+${itinerarySummary}
+
+PLACES TO STRICTLY AVOID (already in the itinerary):
 ${existingPlan.length > 0 ? existingPlan.map((p) => `- ${p}`).join('\n') : '- (none)'}
 
+CATEGORIES ALREADY WELL REPRESENTED (do NOT add more of these unless unavoidable):
+${existingCategories.length > 0 ? existingCategories.map((c) => `- ${c}`).join('\n') : '- (none — feel free to pick any categories)'}
+
 RULES:
-1. NEVER suggest any place listed above.
-2. Spread suggestions across different categories (e.g. landmark, food, nature, museum, entertainment).
-3. Each place must be a specific, real, named location in ${destination} — no generic descriptions.
-4. Provide accurate latitude/longitude coordinates.
-5. Include a concrete reason why each place suits the user's preferences and trip dates.
+1. NEVER suggest any place in the avoid list above.
+2. Fill category gaps — prioritise attraction types NOT already represented in the itinerary.
+3. Balance the suggestions across different times of day (morning, afternoon, evening suitability).
+4. Each suggestion must be a specific, real, named location in ${destination} — no generic descriptions.
+5. Provide accurate latitude/longitude coordinates for each place.
+6. Write a concrete reason explaining why each place suits the user's preferences and complements the existing itinerary.
+7. Return exactly 5 suggestions with good variety across categories.
 
 Return ONLY valid JSON — no explanations, no markdown, no extra text.
 [
@@ -88,7 +125,7 @@ Return ONLY valid JSON — no explanations, no markdown, no extra text.
   }
 ]`;
 
-  const parsed = await callGemini(prompt);
+  const parsed = await callGeminiCreative(prompt);
 
   if (!Array.isArray(parsed)) {
     throw new HttpsError('internal', 'Gemini did not return a JSON array for suggestions.');

@@ -125,8 +125,13 @@ export function useAIOptimize() {
 
 // ─── useAIChat ────────────────────────────────────────────────────────────────
 
-export function useAIChat(baseParams: Omit<ChatAssistantParams, 'userMessage'>) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+// In-memory cache keyed by tripId — survives navigation but resets on full app restart.
+const chatHistoryCache = new Map<string, ChatMessage[]>();
+
+export function useAIChat(tripId: string, baseParams: Omit<ChatAssistantParams, 'userMessage'>) {
+  const [messages, setMessages] = useState<ChatMessage[]>(
+    () => chatHistoryCache.get(tripId) ?? [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -139,7 +144,11 @@ export function useAIChat(baseParams: Omit<ChatAssistantParams, 'userMessage'>) 
         timestamp: Date.now(),
       };
 
-      setMessages((prev) => [...prev, userMsg]);
+      setMessages((prev) => {
+        const updated = [...prev, userMsg];
+        chatHistoryCache.set(tripId, updated);
+        return updated;
+      });
       setIsLoading(true);
       setError(null);
 
@@ -151,7 +160,11 @@ export function useAIChat(baseParams: Omit<ChatAssistantParams, 'userMessage'>) 
           text: reply,
           timestamp: Date.now(),
         };
-        setMessages((prev) => [...prev, assistantMsg]);
+        setMessages((prev) => {
+          const updated = [...prev, assistantMsg];
+          chatHistoryCache.set(tripId, updated);
+          return updated;
+        });
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Failed to get reply';
         setError(msg);
@@ -161,12 +174,16 @@ export function useAIChat(baseParams: Omit<ChatAssistantParams, 'userMessage'>) 
           text: 'Sorry, I could not process your request. Please try again.',
           timestamp: Date.now(),
         };
-        setMessages((prev) => [...prev, errMsg]);
+        setMessages((prev) => {
+          const updated = [...prev, errMsg];
+          chatHistoryCache.set(tripId, updated);
+          return updated;
+        });
       } finally {
         setIsLoading(false);
       }
     },
-    [baseParams],
+    [tripId, baseParams],
   );
 
   return { messages, isLoading, error, sendMessage };
