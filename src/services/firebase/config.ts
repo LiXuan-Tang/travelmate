@@ -1,5 +1,6 @@
+import { Platform } from 'react-native';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, getAuth, getReactNativePersistence, browserLocalPersistence, browserPopupRedirectResolver } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -18,6 +19,9 @@ const isFirstInit = getApps().length === 0;
 const app = isFirstInit ? initializeApp(firebaseConfig) : getApp();
 
 function createAuth() {
+  if (Platform.OS === 'web') {
+    return initializeAuth(app, { persistence: browserLocalPersistence, popupRedirectResolver: browserPopupRedirectResolver });
+  }
   try {
     // Lazily require AsyncStorage so the app does not crash if the native
     // module hasn't been compiled into the build yet (e.g. before running

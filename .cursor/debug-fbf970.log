@@ -1,0 +1,10 @@
+{"sessionId":"fbf970","location":"config.ts:createAuth","message":"createAuth called","data":{"platformOS":"web","isFirstInit":true},"timestamp":1777293172683,"hypothesisId":"H2,H3"}
+{"sessionId":"fbf970","location":"config.ts:createAuth-web","message":"web branch taken — initializeAuth with browserLocalPersistence ONLY (no popupRedirectResolver)","data":{"platformOS":"web"},"timestamp":1777293172684,"hypothesisId":"H1"}
+{"sessionId":"fbf970","location":"config.ts:createAuth","message":"createAuth called","data":{"platformOS":"web","isFirstInit":true},"timestamp":1777293176868,"hypothesisId":"H2,H3"}
+{"sessionId":"fbf970","location":"config.ts:createAuth-web","message":"web branch taken — initializeAuth with browserLocalPersistence ONLY (no popupRedirectResolver)","data":{"platformOS":"web"},"timestamp":1777293176869,"hypothesisId":"H1"}
+{"sessionId":"fbf970","location":"auth.ts:signInWithGoogle","message":"about to call signInWithPopup","data":{"authAppName":"[DEFAULT]","authType":"object","hasPopupResolver":false},"timestamp":1777293178398,"hypothesisId":"H1,H3,H4"}
+{"sessionId":"fbf970","location":"config.ts:createAuth","message":"createAuth called","data":{"platformOS":"web","isFirstInit":true},"timestamp":1777293312399,"hypothesisId":"H2,H3"}
+{"sessionId":"fbf970","location":"config.ts:createAuth-web","message":"web branch taken — initializeAuth with browserLocalPersistence + browserPopupRedirectResolver","data":{"platformOS":"web"},"timestamp":1777293312400,"hypothesisId":"H1"}
+{"sessionId":"fbf970","location":"config.ts:createAuth","message":"createAuth called","data":{"platformOS":"web","isFirstInit":true},"timestamp":1777293322570,"hypothesisId":"H2,H3"}
+{"sessionId":"fbf970","location":"config.ts:createAuth-web","message":"web branch taken — initializeAuth with browserLocalPersistence + browserPopupRedirectResolver","data":{"platformOS":"web"},"timestamp":1777293322571,"hypothesisId":"H1"}
+{"sessionId":"fbf970","runId":"post-fix","location":"auth.ts:signInWithGoogle","message":"about to call signInWithPopup","data":{"authAppName":"[DEFAULT]","hasPopupResolver":true},"timestamp":1777293328672,"hypothesisId":"H1"}

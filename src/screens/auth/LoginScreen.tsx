@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signInWithGoogle } from '@services/firebase/auth';
 import { Button } from '@components/ui';
 
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
+    setError(null);
     try {
       setLoading(true);
       await signInWithGoogle();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Sign in failed.';
-      Alert.alert('Sign In Failed', message);
+      const code = (err as { code?: string })?.code ?? '';
+      let message = err instanceof Error ? err.message : 'Sign in failed.';
+      if (code === 'auth/popup-blocked') {
+        message = 'Popup was blocked by the browser. Please allow popups for this site and try again.';
+      } else if (code === 'auth/popup-closed-by-user') {
+        message = 'Sign-in popup was closed. Please try again.';
+      } else if (code === 'auth/unauthorized-domain') {
+        message = 'This domain is not authorised in Firebase. Add localhost to the Authorised Domains list in Firebase Console.';
+      }
+      console.error('[TravelMate] Sign-in error:', code, err);
+      if (Platform.OS === 'web') {
+        setError(message);
+      } else {
+        const { Alert } = require('react-native');
+        Alert.alert('Sign In Failed', message);
+      }
     } finally {
       setLoading(false);
     }
@@ -39,6 +55,7 @@ export default function LoginScreen() {
           {loading ? (
             <View className="py-3 items-center">
               <ActivityIndicator size="small" color="#006a66" />
+              <Text className="text-xs text-muted-foreground mt-2">Opening Google sign-in…</Text>
             </View>
           ) : (
             <Button
@@ -54,6 +71,12 @@ export default function LoginScreen() {
                 <Text className="text-sm font-semibold text-foreground">Continue with Google</Text>
               </View>
             </Button>
+          )}
+
+          {!!error && (
+            <View className="mt-4 bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-3">
+              <Text className="text-xs text-destructive leading-5">{error}</Text>
+            </View>
           )}
         </View>
 
