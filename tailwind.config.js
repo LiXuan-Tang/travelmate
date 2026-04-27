@@ -5,27 +5,27 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#FFFFFF',
+        background: '#fdf9ec',
         surface: '#FFFFFF',
-        border: '#E5E5E5',
-        foreground: '#0A0A0A',
+        border: '#d4cdb8',
+        foreground: '#111827',
         primary: {
-          DEFAULT: '#0A0A0A',
+          DEFAULT: '#006a66',
           foreground: '#FFFFFF',
-          light: '#F5F5F5',
-          dark: '#000000',
+          light: '#9cf1ec',
+          dark: '#004e4a',
         },
         muted: {
-          DEFAULT: '#F5F5F5',
-          foreground: '#737373',
+          DEFAULT: '#ede8d5',
+          foreground: '#6b7280',
         },
         destructive: {
           DEFAULT: '#EF4444',
           foreground: '#FFFFFF',
         },
         secondary: {
-          DEFAULT: '#F5F5F5',
-          foreground: '#0A0A0A',
+          DEFAULT: '#00677c',
+          foreground: '#FFFFFF',
         },
       },
       borderRadius: {

@@ -87,7 +87,7 @@ function DayPlanModal({
                 activeOpacity={0.75}
                 className={`mx-1 px-4 py-2 rounded-xl border ${
                   dayNumber === d
-                    ? 'bg-foreground border-foreground'
+                    ? 'bg-primary border-primary'
                     : 'bg-surface border-border'
                 }`}
               >
@@ -111,9 +111,9 @@ function DayPlanModal({
         >
           {isLoading ? (
             <View className="items-center pt-16">
-              <ActivityIndicator size="large" color="#2563EB" />
-              <Text className="mt-3 text-sm text-muted-foreground">
-                Generating Day {dayNumber} plan…
+        <ActivityIndicator size="large" color="#006a66" />
+          <Text className="mt-3 text-sm text-muted-foreground">
+            Generating Day {dayNumber} plan…
               </Text>
             </View>
           ) : error ? (
@@ -163,7 +163,7 @@ function DayPlanModal({
                       disabled={isAdded}
                       activeOpacity={0.75}
                       className={`rounded-xl px-3 py-1.5 shrink-0 ${
-                        isAdded ? 'bg-muted' : 'bg-foreground'
+                        isAdded ? 'bg-muted' : 'bg-primary'
                       }`}
                     >
                       <Text
@@ -191,7 +191,7 @@ function DayPlanModal({
               className={`rounded-2xl py-3 items-center ${
                 isAddingAll || activities.every((a) => addedNames.has(a.name))
                   ? 'bg-muted'
-                  : 'bg-foreground'
+                  : 'bg-primary'
               }`}
             >
               {isAddingAll ? (
@@ -512,8 +512,8 @@ export default function AIRecommendationsScreen({ route, navigation }: Props) {
       {/* Content */}
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#2563EB" />
-          <Text className="mt-3 text-sm text-muted-foreground">
+        <ActivityIndicator size="large" color="#006a66" />
+        <Text className="mt-3 text-sm text-muted-foreground">
             Finding the best places for you…
           </Text>
         </View>

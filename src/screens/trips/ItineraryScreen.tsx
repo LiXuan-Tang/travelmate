@@ -106,7 +106,7 @@ function SectionHeader({
   return (
     <View className="flex-row items-center px-5 py-2 bg-background">
       {section.dayNumber !== null && (
-        <View className="w-8 h-8 rounded-full bg-foreground items-center justify-center mr-3">
+        <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-3">
           <Text className="text-white text-xs font-bold">{section.dayNumber}</Text>
         </View>
       )}
@@ -121,7 +121,7 @@ function SectionHeader({
           <TouchableOpacity
             onPress={() => onGenerateDayPlan(section.dayNumber!)}
             activeOpacity={0.75}
-            className="bg-primary-light border border-primary/20 rounded-xl px-3 py-1.5"
+            className="bg-primary-light border border-primary/30 rounded-xl px-3 py-1.5"
           >
             <Text className="text-xs font-semibold text-primary">AI Plan</Text>
           </TouchableOpacity>
@@ -194,7 +194,7 @@ function ItineraryDayPlanModal({
         >
           {isLoading ? (
             <View className="items-center pt-16">
-              <ActivityIndicator size="large" color="#2563EB" />
+              <ActivityIndicator size="large" color="#006a66" />
               <Text className="mt-3 text-sm text-muted-foreground">
                 Generating AI plan for Day {dayNumber}…
               </Text>
@@ -243,7 +243,7 @@ function ItineraryDayPlanModal({
                       disabled={isAdded}
                       activeOpacity={0.75}
                       className={`rounded-xl px-3 py-1.5 shrink-0 ${
-                        isAdded ? 'bg-muted' : 'bg-foreground'
+                        isAdded ? 'bg-muted' : 'bg-primary'
                       }`}
                     >
                       <Text
@@ -271,7 +271,7 @@ function ItineraryDayPlanModal({
               className={`rounded-2xl py-3 items-center ${
                 isAddingAll || activities.every((a) => addedNames.has(a.name))
                   ? 'bg-muted'
-                  : 'bg-foreground'
+                  : 'bg-primary'
               }`}
             >
               {isAddingAll ? (
@@ -349,7 +349,7 @@ function DestinationRow({
   return (
     <View
       className={`mx-4 mb-3 bg-surface border rounded-2xl overflow-hidden ${
-        isDragging ? 'border-foreground shadow-lg' : 'border-border'
+        isDragging ? 'border-primary shadow-lg' : 'border-border'
       }`}
       style={isDragging ? { elevation: 8 } : undefined}
     >
@@ -537,7 +537,7 @@ function ReorderableRow({
       style={
         isActive
           ? {
-              borderColor: '#0A0A0A',
+              borderColor: '#006a66',
               elevation: 10,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
@@ -715,7 +715,7 @@ function DraggableReorderList({ sections, onDone, onCancel }: DraggableReorderLi
                   className="flex-row items-center px-5 bg-muted border-b border-border"
                 >
                   {row.dayNumber !== null && (
-                    <View className="w-6 h-6 rounded-full bg-foreground items-center justify-center mr-2">
+                    <View className="w-6 h-6 rounded-full bg-primary items-center justify-center mr-2">
                       <Text className="text-white text-xs font-bold">{row.dayNumber}</Text>
                     </View>
                   )}
@@ -1097,7 +1097,7 @@ export default function ItineraryScreen({ route, navigation }: Props) {
                 style={{ marginRight: 8 }}
                 className={`px-4 py-1.5 rounded-xl border ${
                   validSelectedKey === tab.key
-                    ? 'bg-foreground border-foreground'
+                    ? 'bg-primary border-primary'
                     : 'bg-surface border-border'
                 }`}
               >
@@ -1176,7 +1176,7 @@ export default function ItineraryScreen({ route, navigation }: Props) {
             <TouchableOpacity
               onPress={() => setReorderMode(true)}
               activeOpacity={0.85}
-              className="bg-foreground rounded-full px-5 py-3 flex-row items-center"
+              className="bg-secondary rounded-full px-5 py-3 flex-row items-center"
               style={{ elevation: 4 }}
             >
               <Text className="text-white text-xs font-semibold">⇅  Reorder</Text>

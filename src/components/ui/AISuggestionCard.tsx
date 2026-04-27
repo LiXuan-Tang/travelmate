@@ -126,7 +126,7 @@ export function AISuggestionCard({
           className="flex-row items-center justify-center py-3 px-4"
         >
           {isAdding ? (
-            <ActivityIndicator size="small" color="#2563EB" />
+            <ActivityIndicator size="small" color="#006a66" />
           ) : (
             <Text className="text-sm font-semibold text-primary">+ Add to Itinerary</Text>
           )}

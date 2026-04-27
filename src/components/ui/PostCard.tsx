@@ -31,7 +31,7 @@ function timeAgo(ts: { seconds: number } | null | undefined): string {
 
 function ImageCarousel({ images, title }: { images: string[]; title: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const cardWidth = SCREEN_WIDTH - 32; // 16px padding each side
+  const cardWidth = SCREEN_WIDTH - 32;
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
@@ -140,7 +140,7 @@ export function PostCard({
         </View>
 
         {!!post.destination && (
-          <View className="bg-primary-light rounded-full px-2.5 py-0.5">
+          <View className="bg-primary-light rounded-full px-2.5 py-0.5 border border-primary/20">
             <Text className="text-xs font-medium text-primary" numberOfLines={1}>
               📍 {post.destination}
             </Text>

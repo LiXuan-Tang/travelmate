@@ -87,19 +87,16 @@ export default function CommunityScreen() {
   const [authors, setAuthors] = useState<Record<string, UserProfile>>({});
   const authorsFetching = useRef<Set<string>>(new Set());
 
-  // Load public feed on mount
   useEffect(() => {
     load();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Subscribe to own posts
   useEffect(() => {
     if (!user) return;
     const unsub = subscribeToUserPosts(user.uid, setMyPosts);
     return unsub;
   }, [user]);
 
-  // Resolve author profiles (lazy, cached)
   const fetchAuthor = useCallback(
     async (uid: string) => {
       if (authors[uid] || authorsFetching.current.has(uid)) return;
@@ -128,7 +125,6 @@ export default function CommunityScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Post }) => {
-      // Lazy fetch author when the card appears
       fetchAuthor(item.authorId);
       return (
         <PostCard
@@ -157,7 +153,7 @@ export default function CommunityScreen() {
         <TouchableOpacity
           onPress={handleNavigateToForm}
           activeOpacity={0.8}
-          className="bg-foreground px-4 py-2 rounded-full"
+          className="bg-primary px-4 py-2 rounded-full"
         >
           <Text className="text-white text-sm font-semibold">+ Post</Text>
         </TouchableOpacity>
@@ -172,12 +168,12 @@ export default function CommunityScreen() {
               onPress={() => setTab(key)}
               activeOpacity={0.75}
               className={`px-4 py-2.5 border-b-2 ${
-                tab === key ? 'border-foreground' : 'border-transparent'
+                tab === key ? 'border-primary' : 'border-transparent'
               }`}
             >
               <Text
                 className={`text-sm font-semibold ${
-                  tab === key ? 'text-foreground' : 'text-muted-foreground'
+                  tab === key ? 'text-primary' : 'text-muted-foreground'
                 }`}
               >
                 {label}
@@ -190,7 +186,7 @@ export default function CommunityScreen() {
       {/* Initial loading */}
       {isLoading && displayedPosts.length === 0 ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color="#006a66" />
         </View>
       ) : (
         <FlatList
@@ -205,7 +201,7 @@ export default function CommunityScreen() {
             <RefreshControl
               refreshing={isLoading && displayedPosts.length > 0}
               onRefresh={load}
-              tintColor="#2563EB"
+              tintColor="#006a66"
             />
           }
           ListEmptyComponent={
@@ -214,7 +210,7 @@ export default function CommunityScreen() {
           ListFooterComponent={
             tab === 'all' && isLoadingMore ? (
               <View className="py-4 items-center">
-                <ActivityIndicator size="small" color="#2563EB" />
+                <ActivityIndicator size="small" color="#006a66" />
               </View>
             ) : null
           }

@@ -207,7 +207,7 @@ export default function TripFormScreen({ route, navigation }: Props) {
                   onPress={() => setVisibility(opt.value)}
                   activeOpacity={0.7}
                   className={`flex-1 rounded-xl border py-3 px-2 items-center ${
-                    isSelected ? 'bg-foreground border-foreground' : 'bg-muted border-border'
+                    isSelected ? 'bg-primary border-primary' : 'bg-muted border-border'
                   }`}
                 >
                   <Text
@@ -227,7 +227,7 @@ export default function TripFormScreen({ route, navigation }: Props) {
 
           {isLoading && (
             <View className="items-center py-2">
-              <ActivityIndicator size="small" color="#0A0A0A" />
+              <ActivityIndicator size="small" color="#006a66" />
               <Text className="text-xs text-muted-foreground mt-1">
                 {isEditing ? 'Saving changes…' : 'Creating trip…'}
               </Text>

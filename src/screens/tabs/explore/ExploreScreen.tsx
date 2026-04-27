@@ -75,7 +75,6 @@ export default function ExploreScreen() {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load featured destination cover photos on mount
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -89,8 +88,6 @@ export default function ExploreScreen() {
     })();
     return () => { cancelled = true; };
   }, []);
-
-  // ── Autocomplete search ──────────────────────────────────────────────────
 
   const handleQueryChange = useCallback((text: string) => {
     setQuery(text);
@@ -120,8 +117,6 @@ export default function ExploreScreen() {
     }, 400);
   }, []);
 
-  // ── Category browsing ────────────────────────────────────────────────────
-
   const handleCategoryPress = useCallback(async (cat: (typeof CATEGORIES)[number]) => {
     Keyboard.dismiss();
     setQuery('');
@@ -143,8 +138,6 @@ export default function ExploreScreen() {
       setIsCategoryLoading(false);
     }
   }, [activeCategory]);
-
-  // ── Place selection ──────────────────────────────────────────────────────
 
   const openPlaceDetail = useCallback(async (placeId: string) => {
     Keyboard.dismiss();
@@ -201,8 +194,6 @@ export default function ExploreScreen() {
 
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
-  // ── Derived state ────────────────────────────────────────────────────────
-
   const isTextSearch    = !!query;
   const isBrowsing      = !!activeCategory && !query;
   const isActive        = isTextSearch || isBrowsing;
@@ -212,8 +203,6 @@ export default function ExploreScreen() {
     ? getPhotoUrl(selectedPlace.photoReference, 600)
     : null;
 
-  // ── Render helpers ───────────────────────────────────────────────────────
-
   const renderPrediction = ({ item }: { item: PlacePrediction }) => (
     <TouchableOpacity
       className="flex-row items-center px-5 py-4 border-b border-border"
@@ -221,7 +210,7 @@ export default function ExploreScreen() {
       activeOpacity={0.6}
     >
       <View className="w-9 h-9 rounded-full bg-muted items-center justify-center mr-3 shrink-0">
-        <Ionicons name="location-outline" size={16} color="#737373" />
+        <Ionicons name="location-outline" size={16} color="#006a66" />
       </View>
       <View className="flex-1">
         <Text className="text-sm font-semibold text-foreground" numberOfLines={1}>
@@ -233,7 +222,7 @@ export default function ExploreScreen() {
           </Text>
         )}
       </View>
-      <Ionicons name="chevron-forward" size={14} color="#C4C4C4" />
+      <Ionicons name="chevron-forward" size={14} color="#d4cdb8" />
     </TouchableOpacity>
   );
 
@@ -250,7 +239,7 @@ export default function ExploreScreen() {
             <Image source={{ uri: thumb }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
           ) : (
             <View className="flex-1 items-center justify-center">
-              <Ionicons name="image-outline" size={22} color="#C4C4C4" />
+              <Ionicons name="image-outline" size={22} color="#d4cdb8" />
             </View>
           )}
         </View>
@@ -268,12 +257,10 @@ export default function ExploreScreen() {
             </View>
           )}
         </View>
-        <Ionicons name="chevron-forward" size={14} color="#C4C4C4" />
+        <Ionicons name="chevron-forward" size={14} color="#d4cdb8" />
       </TouchableOpacity>
     );
   };
-
-  // ── JSX ──────────────────────────────────────────────────────────────────
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -286,11 +273,11 @@ export default function ExploreScreen() {
       {/* Search bar */}
       <View className="px-5 mb-5">
         <View className="flex-row items-center bg-muted rounded-xl px-4 border border-border">
-          <Ionicons name="search-outline" size={18} color="#737373" />
+          <Ionicons name="search-outline" size={18} color="#006a66" />
           <TextInput
             className="flex-1 text-sm text-foreground py-3 ml-2.5"
             placeholder="Search places, cities, landmarks…"
-            placeholderTextColor="#A3A3A3"
+            placeholderTextColor="#9ca3a0"
             value={query}
             onChangeText={handleQueryChange}
             autoCorrect={false}
@@ -306,9 +293,9 @@ export default function ExploreScreen() {
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               {isSearching ? (
-                <ActivityIndicator size="small" color="#737373" />
+                <ActivityIndicator size="small" color="#006a66" />
               ) : (
-                <Ionicons name="close-circle" size={18} color="#A3A3A3" />
+                <Ionicons name="close-circle" size={18} color="#9ca3a0" />
               )}
             </TouchableOpacity>
           )}
@@ -318,7 +305,7 @@ export default function ExploreScreen() {
         ) : null}
       </View>
 
-      {/* Category chips — always visible */}
+      {/* Category chips */}
       <View className="px-5 mb-4">
         <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
           Browse by category
@@ -330,7 +317,7 @@ export default function ExploreScreen() {
               <TouchableOpacity
                 key={cat.label}
                 className={`flex-row items-center rounded-full px-4 py-2 border ${
-                  isSelected ? 'bg-foreground border-foreground' : 'bg-surface border-border'
+                  isSelected ? 'bg-primary border-primary' : 'bg-surface border-border'
                 }`}
                 activeOpacity={0.65}
                 onPress={() => handleCategoryPress(cat)}
@@ -349,12 +336,11 @@ export default function ExploreScreen() {
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* ── Active search / category browse ── */}
         {isActive ? (
           <>
             {isContentLoading ? (
               <View className="flex-1 items-center justify-center pb-20">
-                <ActivityIndicator size="large" color="#0A0A0A" />
+                <ActivityIndicator size="large" color="#006a66" />
                 <Text className="text-sm text-muted-foreground mt-3">
                   {isBrowsing ? `Finding ${activeCategory?.toLowerCase()}…` : 'Searching…'}
                 </Text>
@@ -405,13 +391,12 @@ export default function ExploreScreen() {
             )}
           </>
         ) : (
-          /* ── Default content ── */
           <ScrollView
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ paddingBottom: 32 }}
           >
-            {/* Featured destinations — horizontal photo cards */}
+            {/* Featured destinations */}
             <View className="mb-8">
               <Text className="text-base font-semibold text-foreground px-5 mb-3">
                 Featured Destinations
@@ -445,7 +430,6 @@ export default function ExploreScreen() {
                       className="absolute bottom-0 left-0 right-0 px-3 pt-8 pb-3"
                       style={{ background: 'transparent' }}
                     >
-                      {/* dark scrim for legibility */}
                       <View
                         className="absolute bottom-0 left-0 right-0"
                         style={{ height: 72, backgroundColor: 'rgba(0,0,0,0.45)' }}
@@ -458,7 +442,7 @@ export default function ExploreScreen() {
               </ScrollView>
             </View>
 
-            {/* Top travel spots — vertical list */}
+            {/* Top travel spots */}
             <View className="px-5">
               <Text className="text-base font-semibold text-foreground mb-3">
                 Top Travel Spots
@@ -472,14 +456,14 @@ export default function ExploreScreen() {
                     onPress={() => handleTopSpotPress(spot)}
                     disabled={isFetchingDetails}
                   >
-                    <View className="w-12 h-12 rounded-xl bg-muted items-center justify-center mr-4 shrink-0">
+                    <View className="w-12 h-12 rounded-xl bg-primary-light items-center justify-center mr-4 shrink-0">
                       <Text className="text-2xl">{spot.emoji}</Text>
                     </View>
                     <View className="flex-1">
                       <Text className="text-sm font-semibold text-foreground">{spot.name}</Text>
                       <Text className="text-xs text-muted-foreground mt-0.5">{spot.desc}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color="#C4C4C4" />
+                    <Ionicons name="chevron-forward" size={16} color="#d4cdb8" />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -488,7 +472,7 @@ export default function ExploreScreen() {
         )}
       </KeyboardAvoidingView>
 
-      {/* ── Place detail overlay ── */}
+      {/* Place detail overlay */}
       {(isFetchingDetails || selectedPlace) && (
         <View className="absolute inset-0" pointerEvents="box-none">
           <TouchableOpacity
@@ -502,7 +486,7 @@ export default function ExploreScreen() {
           <View className="absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl overflow-hidden border-t border-border">
             {isFetchingDetails ? (
               <View className="items-center justify-center py-16">
-                <ActivityIndicator size="large" color="#0A0A0A" />
+                <ActivityIndicator size="large" color="#006a66" />
                 <Text className="text-sm text-muted-foreground mt-3">Loading details…</Text>
               </View>
             ) : selectedPlace ? (
@@ -516,11 +500,10 @@ export default function ExploreScreen() {
                       resizeMode="cover"
                     />
                   ) : (
-                    <View className="flex-1 items-center justify-center">
+                    <View className="flex-1 items-center justify-center bg-primary-light">
                       <Text className="text-6xl">🗺️</Text>
                     </View>
                   )}
-                  {/* Drag handle */}
                   <View className="absolute top-3 left-0 right-0 items-center">
                     <View className="w-10 h-1 rounded-full bg-white/60" />
                   </View>
@@ -542,14 +525,14 @@ export default function ExploreScreen() {
                   </View>
 
                   <View className="flex-row items-center mb-5">
-                    <Ionicons name="location-outline" size={13} color="#737373" />
+                    <Ionicons name="location-outline" size={13} color="#006a66" />
                     <Text className="text-sm text-muted-foreground ml-1 flex-1" numberOfLines={2}>
                       {selectedPlace.address}
                     </Text>
                   </View>
 
                   <TouchableOpacity
-                    className="bg-foreground rounded-xl py-4 items-center"
+                    className="bg-primary rounded-xl py-4 items-center"
                     activeOpacity={0.75}
                     onPress={() => setSelectedPlace(null)}
                   >

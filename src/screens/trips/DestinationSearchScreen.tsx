@@ -137,7 +137,7 @@ export default function DestinationSearchScreen({ route, navigation }: Props) {
       onPress={() => handleSelectPrediction(item)}
       activeOpacity={0.6}
     >
-      <View className="w-9 h-9 rounded-full bg-primary/10 items-center justify-center mr-3 shrink-0">
+      <View className="w-9 h-9 rounded-full bg-primary-light items-center justify-center mr-3 shrink-0">
         <Text className="text-base">📍</Text>
       </View>
       <View className="flex-1">
@@ -241,7 +241,7 @@ export default function DestinationSearchScreen({ route, navigation }: Props) {
         {/* Fetching details spinner */}
         {isFetchingDetails ? (
           <View className="flex-1 items-center justify-center pb-20">
-            <ActivityIndicator size="large" color="#2563EB" />
+            <ActivityIndicator size="large" color="#006a66" />
             <Text className="text-sm text-muted-foreground mt-3">Loading place details…</Text>
           </View>
         ) : null}

@@ -237,7 +237,7 @@ export default function PostFormScreen({ route, navigation }: Props) {
                     onPress={() => active ? handleRemoveTag(preset) : handleAddTag(preset)}
                     activeOpacity={0.75}
                     className={`rounded-full px-3 py-1 border ${
-                      active ? 'bg-foreground border-foreground' : 'bg-surface border-border'
+                      active ? 'bg-primary border-primary' : 'bg-surface border-border'
                     }`}
                   >
                     <Text className={`text-xs font-medium ${active ? 'text-white' : 'text-foreground'}`}>
@@ -264,7 +264,7 @@ export default function PostFormScreen({ route, navigation }: Props) {
                 onPress={() => handleAddTag(tagInput)}
                 disabled={!tagInput.trim()}
                 activeOpacity={0.75}
-                className="bg-foreground rounded-xl px-3 py-2.5"
+                className="bg-primary rounded-xl px-3 py-2.5"
               >
                 <Text className="text-xs font-semibold text-white">Add</Text>
               </TouchableOpacity>
@@ -280,7 +280,7 @@ export default function PostFormScreen({ route, navigation }: Props) {
                       key={tag}
                       onPress={() => handleRemoveTag(tag)}
                       activeOpacity={0.75}
-                      className="flex-row items-center bg-foreground rounded-full px-3 py-1 gap-x-1"
+                      className="flex-row items-center bg-primary rounded-full px-3 py-1 gap-x-1"
                     >
                       <Text className="text-xs text-white">#{tag}</Text>
                       <Text className="text-xs text-white/70">×</Text>
@@ -303,7 +303,7 @@ export default function PostFormScreen({ route, navigation }: Props) {
                   activeOpacity={0.75}
                   className={`flex-1 rounded-xl py-3 items-center border ${
                     visibility === v
-                      ? 'bg-foreground border-foreground'
+                      ? 'bg-primary border-primary'
                       : 'bg-surface border-border'
                   }`}
                 >

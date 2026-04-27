@@ -78,12 +78,12 @@ export default function ProfileScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <View className="w-20 h-20 rounded-full bg-foreground items-center justify-center">
+              <View className="w-20 h-20 rounded-full bg-primary items-center justify-center">
                 <Text className="text-2xl font-bold text-white">{initial}</Text>
               </View>
             )}
             {/* Edit badge */}
-            <View className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary border-2 border-background items-center justify-center">
+            <View className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-secondary border-2 border-background items-center justify-center">
               <Ionicons name="pencil" size={10} color="#fff" />
             </View>
           </TouchableOpacity>
@@ -109,11 +109,11 @@ export default function ProfileScreen() {
                 activeOpacity={0.55}
                 onPress={item.onPress}
               >
-                <View className="w-8 h-8 rounded-xl bg-muted items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-xl bg-primary-light items-center justify-center mr-3">
                   <Ionicons
                     name={item.icon}
                     size={17}
-                    color={item.destructive ? '#EF4444' : '#0A0A0A'}
+                    color={item.destructive ? '#EF4444' : '#006a66'}
                   />
                 </View>
                 <Text
@@ -121,7 +121,7 @@ export default function ProfileScreen() {
                 >
                   {item.label}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color="#A3A3A3" />
+                <Ionicons name="chevron-forward" size={16} color="#d4cdb8" />
               </TouchableOpacity>
               {index < menuItems.length - 1 && <Separator className="mx-5" />}
             </React.Fragment>

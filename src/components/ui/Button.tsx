@@ -16,7 +16,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   outline: 'bg-surface border border-border',
   ghost: 'bg-transparent border border-transparent',
   destructive: 'bg-destructive border border-destructive',
-  secondary: 'bg-muted border border-muted',
+  secondary: 'bg-secondary border border-secondary',
 };
 
 const textVariantClasses: Record<ButtonVariant, string> = {
@@ -59,7 +59,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'default' || variant === 'destructive' ? '#fff' : '#2563EB'}
+          color={variant === 'default' || variant === 'destructive' || variant === 'secondary' ? '#fff' : '#006a66'}
         />
       ) : typeof children === 'string' ? (
         <Text className={`${textVariantClasses[variant]} ${textSizeClasses[size]}`}>

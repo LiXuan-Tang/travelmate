@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Feather } from '@expo/vector-icons';
 import { useAuthStore } from '@store/authStore';
 import { useTripStore } from '@store/tripStore';
 import { useCommunityStore } from '@store/communityStore';
@@ -24,11 +25,13 @@ type HomeNav = CompositeNavigationProp<
   NativeStackNavigationProp<RootStackParamList>
 >;
 
-const QUICK_ACTIONS = [
-  { label: 'New Trip', icon: '✈️' },
-  { label: 'Explore', icon: '🧭' },
-  { label: 'AI Ideas', icon: '✨' },
-  { label: 'Community', icon: '🌍' },
+type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
+
+const QUICK_ACTIONS: { label: string; icon: FeatherIconName }[] = [
+  { label: 'New Trip', icon: 'navigation' },
+  { label: 'Explore', icon: 'compass' },
+  { label: 'AI Ideas', icon: 'cpu' },
+  { label: 'Community', icon: 'users' },
 ];
 
 export default function HomeScreen() {
@@ -95,12 +98,12 @@ export default function HomeScreen() {
             {QUICK_ACTIONS.map((action) => (
               <TouchableOpacity
                 key={action.label}
-                className="flex-1 items-center bg-primary-light rounded-2xl py-4 border border-border"
+                className="flex-1 items-center bg-primary-light rounded-2xl py-4 border border-primary/20"
                 activeOpacity={0.65}
                 onPress={() => handleQuickAction(action.label)}
               >
-                <Text className="text-base mb-1">{action.icon}</Text>
-                <Text className="text-xs font-medium text-foreground text-center">
+                <Feather name={action.icon} size={18} color="#6366f1" style={{ marginBottom: 4 }} />
+                <Text className="text-xs font-medium text-primary text-center">
                   {action.label}
                 </Text>
               </TouchableOpacity>
@@ -169,7 +172,7 @@ function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll: () => voi
     <View className="flex-row justify-between items-center mb-3">
       <Text className="text-base font-semibold text-foreground">{title}</Text>
       <TouchableOpacity onPress={onSeeAll} activeOpacity={0.7}>
-        <Text className="text-sm font-medium text-muted-foreground">See all</Text>
+        <Text className="text-sm font-medium text-primary">See all</Text>
       </TouchableOpacity>
     </View>
   );
@@ -189,12 +192,12 @@ function EmptyCard({
   onAction?: () => void;
 }) {
   return (
-    <View className="bg-surface rounded-2xl border border-border px-5 py-6">
+    <View className="bg-primary-light rounded-2xl border border-primary/20 px-5 py-6">
       <Text className="text-sm font-semibold text-foreground mb-1">{message}</Text>
       <Text className="text-xs text-muted-foreground leading-5">{description}</Text>
       {action && onAction && (
         <TouchableOpacity
-          className="mt-4 self-start px-4 py-2 bg-foreground rounded-full"
+          className="mt-4 self-start px-4 py-2 bg-primary rounded-full"
           onPress={onAction}
           activeOpacity={0.8}
         >
@@ -241,7 +244,7 @@ function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void }) {
           resizeMode="cover"
         />
       ) : (
-        <View className="h-1.5 bg-foreground w-full" />
+        <View className="h-1.5 bg-primary w-full" />
       )}
       <View className="px-4 py-3">
         <View className="flex-row items-center justify-between mb-0.5">
@@ -272,9 +275,10 @@ function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
       onPress={onPress}
     >
       {post.destination ? (
-        <Text className="text-xs font-medium text-muted-foreground mb-1">
-          📍 {post.destination}
-        </Text>
+        <View className="flex-row items-center mb-1">
+          <Feather name="map-pin" size={11} color="#6366f1" style={{ marginRight: 4 }} />
+          <Text className="text-xs font-medium text-primary">{post.destination}</Text>
+        </View>
       ) : null}
       <Text className="text-sm font-semibold text-foreground mb-1" numberOfLines={2}>
         {post.title}
@@ -285,8 +289,14 @@ function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
         </Text>
       ) : null}
       <View className="flex-row items-center mt-2 gap-3">
-        <Text className="text-xs text-muted-foreground">♥ {post.likesCount}</Text>
-        <Text className="text-xs text-muted-foreground">💬 {post.commentsCount}</Text>
+        <View className="flex-row items-center gap-1">
+          <Feather name="heart" size={11} color="#a1a1aa" />
+          <Text className="text-xs text-muted-foreground">{post.likesCount}</Text>
+        </View>
+        <View className="flex-row items-center gap-1">
+          <Feather name="message-circle" size={11} color="#a1a1aa" />
+          <Text className="text-xs text-muted-foreground">{post.commentsCount}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );

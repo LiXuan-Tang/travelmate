@@ -32,15 +32,15 @@ export default function MainTabNavigator() {
             <Ionicons
               name={iconName}
               size={size ?? 22}
-              color={focused ? '#0A0A0A' : '#A3A3A3'}
+              color={focused ? '#006a66' : '#9ca3af'}
             />
           );
         },
-        tabBarActiveTintColor: '#0A0A0A',
-        tabBarInactiveTintColor: '#A3A3A3',
+        tabBarActiveTintColor: '#006a66',
+        tabBarInactiveTintColor: '#9ca3af',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: '#E5E5E5',
+          borderTopColor: '#d4cdb8',
           borderTopWidth: 1,
           paddingBottom: 8,
           paddingTop: 6,

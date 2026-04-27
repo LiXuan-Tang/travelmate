@@ -25,7 +25,7 @@ export default function LoginScreen() {
 
         {/* Brand */}
         <View className="mb-12">
-          <Text className="text-3xl font-bold text-foreground tracking-tight">TravelMate</Text>
+          <Text className="text-3xl font-bold text-primary tracking-tight">TravelMate</Text>
           <Text className="text-sm text-muted-foreground mt-1.5">Plan your next adventure.</Text>
         </View>
 
@@ -38,7 +38,7 @@ export default function LoginScreen() {
 
           {loading ? (
             <View className="py-3 items-center">
-              <ActivityIndicator size="small" color="#0A0A0A" />
+              <ActivityIndicator size="small" color="#006a66" />
             </View>
           ) : (
             <Button
@@ -48,7 +48,7 @@ export default function LoginScreen() {
               className="w-full"
             >
               <View className="flex-row items-center justify-center gap-3">
-                <View className="w-5 h-5 rounded-full bg-foreground items-center justify-center">
+                <View className="w-5 h-5 rounded-full bg-primary items-center justify-center">
                   <Text className="text-white text-xs font-bold">G</Text>
                 </View>
                 <Text className="text-sm font-semibold text-foreground">Continue with Google</Text>
@@ -60,9 +60,9 @@ export default function LoginScreen() {
         {/* Footer */}
         <Text className="text-xs text-muted-foreground text-center mt-6 leading-5">
           By continuing, you agree to our{' '}
-          <Text className="text-foreground font-medium">Terms of Service</Text>
+          <Text className="text-primary font-medium">Terms of Service</Text>
           {' '}and{' '}
-          <Text className="text-foreground font-medium">Privacy Policy</Text>.
+          <Text className="text-primary font-medium">Privacy Policy</Text>.
         </Text>
       </View>
     </SafeAreaView>

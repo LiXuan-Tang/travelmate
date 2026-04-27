@@ -51,7 +51,6 @@ export function DatePickerModal({
   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(displayYear, displayMonth, 1).getDay();
 
-  // Build calendar grid cells (null = empty padding cell)
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
@@ -102,7 +101,7 @@ export function DatePickerModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 items-center justify-center px-5">
-        <View className="bg-background w-full rounded-3xl overflow-hidden">
+        <View className="bg-surface w-full rounded-3xl overflow-hidden">
           {/* Header */}
           <View className="flex-row items-center justify-between px-5 pt-5 pb-3 border-b border-border">
             <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
@@ -110,7 +109,7 @@ export function DatePickerModal({
             </TouchableOpacity>
             <Text className="text-sm font-bold text-foreground">{title}</Text>
             <TouchableOpacity onPress={handleConfirm} activeOpacity={0.7}>
-              <Text className="text-sm font-bold text-foreground">Done</Text>
+              <Text className="text-sm font-bold text-primary">Done</Text>
             </TouchableOpacity>
           </View>
 
@@ -166,7 +165,7 @@ export function DatePickerModal({
                     <TouchableOpacity
                       key={day}
                       className={`flex-1 h-10 items-center justify-center rounded-full mx-0.5 my-0.5 ${
-                        isSelected ? 'bg-foreground' : isToday ? 'bg-muted' : ''
+                        isSelected ? 'bg-primary' : isToday ? 'bg-primary-light' : ''
                       }`}
                       onPress={() => !isDisabled && handleDayPress(day)}
                       activeOpacity={0.7}
@@ -179,7 +178,7 @@ export function DatePickerModal({
                             : isDisabled
                               ? 'text-muted-foreground/40'
                               : isToday
-                                ? 'text-foreground font-semibold'
+                                ? 'text-primary font-semibold'
                                 : 'text-foreground'
                         }`}
                       >
@@ -195,7 +194,7 @@ export function DatePickerModal({
             <View className="mt-4 pt-3 border-t border-border items-center">
               <Text className="text-xs text-muted-foreground">
                 Selected:{' '}
-                <Text className="font-semibold text-foreground">
+                <Text className="font-semibold text-primary">
                   {selected.toLocaleDateString('en-US', {
                     weekday: 'short',
                     month: 'long',

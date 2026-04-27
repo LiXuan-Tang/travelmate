@@ -248,7 +248,7 @@ export default function PostDetailScreen({ route, navigation }: Props) {
                 <Text className="text-xs text-muted-foreground">{timeAgo(post.createdAt)}</Text>
               </View>
               {!!post.destination && (
-                <View className="ml-auto bg-primary-light rounded-full px-2.5 py-0.5">
+                <View className="ml-auto bg-primary-light rounded-full px-2.5 py-0.5 border border-primary/20">
                   <Text className="text-xs font-medium text-primary">📍 {post.destination}</Text>
                 </View>
               )}
@@ -326,7 +326,7 @@ export default function PostDetailScreen({ route, navigation }: Props) {
             }`}
           >
             {isSubmitting ? (
-              <ActivityIndicator size="small" color="#2563EB" />
+              <ActivityIndicator size="small" color="#006a66" />
             ) : (
               <Text className="text-white font-bold" style={{ fontSize: 16 }}>↑</Text>
             )}

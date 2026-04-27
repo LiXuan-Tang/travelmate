@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Feather } from '@expo/vector-icons';
 import { RootStackParamList, Destination } from '@app-types/index';
 import { useTripStore } from '@store/tripStore';
 import { useTrips } from '@hooks/useTrips';
@@ -51,12 +52,12 @@ function DestinationCard({
   return (
     <View className="flex-row items-center bg-surface border border-border rounded-2xl mb-3 overflow-hidden">
       {/* Thumbnail */}
-      <View className="w-20 h-20 bg-muted shrink-0">
+      <View className="w-20 h-20 bg-primary-light shrink-0">
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} className="w-full h-full" resizeMode="cover" />
         ) : (
           <View className="flex-1 items-center justify-center">
-            <Text className="text-2xl">📍</Text>
+            <Feather name="map-pin" size={24} color="#6366f1" />
           </View>
         )}
       </View>
@@ -174,7 +175,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
       <SafeAreaView className="flex-1 bg-background items-center justify-center">
         <Text className="text-base text-muted-foreground">Trip not found.</Text>
         <TouchableOpacity onPress={() => navigation.goBack()} className="mt-4">
-          <Text className="text-sm font-semibold text-foreground">Go Back</Text>
+          <Text className="text-sm font-semibold text-primary">Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -194,7 +195,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Hero Image */}
-        <View style={{ height: 280 }} className="bg-muted relative">
+        <View style={{ height: 280 }} className="bg-primary-light relative">
           {trip.coverImage ? (
             <Image
               source={{ uri: trip.coverImage }}
@@ -203,7 +204,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
             />
           ) : (
             <View className="flex-1 items-center justify-center">
-              <Text style={{ fontSize: 64 }}>🗺️</Text>
+              <Feather name="map" size={56} color="#6366f1" style={{ opacity: 0.4 }} />
             </View>
           )}
 
@@ -241,7 +242,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
           {/* Date Range */}
           <View className="bg-muted rounded-2xl p-4 mb-4">
             <View className="flex-row items-center mb-3">
-              <View className="w-2 h-2 rounded-full bg-foreground mr-3" />
+              <View className="w-2 h-2 rounded-full bg-primary mr-3" />
               <View>
                 <Text className="text-xs text-muted-foreground mb-0.5">Departure</Text>
                 <Text className="text-sm font-semibold text-foreground">
@@ -251,7 +252,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
             </View>
             <View className="w-px h-4 bg-border ml-1 mb-3" />
             <View className="flex-row items-center">
-              <View className="w-2 h-2 rounded-full border-2 border-foreground mr-3" />
+              <View className="w-2 h-2 rounded-full border-2 border-primary mr-3" />
               <View>
                 <Text className="text-xs text-muted-foreground mb-0.5">Return</Text>
                 <Text className="text-sm font-semibold text-foreground">
@@ -263,20 +264,20 @@ export default function TripDetailScreen({ route, navigation }: Props) {
 
           {/* Stats Row */}
           <View className="flex-row gap-x-3 mb-6">
-            <View className="flex-1 bg-muted rounded-xl p-4 items-center">
-              <Text className="text-xl font-bold text-foreground">{duration}</Text>
+            <View className="flex-1 bg-primary-light rounded-xl p-4 items-center">
+              <Text className="text-xl font-bold text-primary">{duration}</Text>
               <Text className="text-xs text-muted-foreground mt-0.5">Duration</Text>
             </View>
-            <View className="flex-1 bg-muted rounded-xl p-4 items-center">
-              <Text className="text-xl font-bold text-foreground">
+            <View className="flex-1 bg-primary-light rounded-xl p-4 items-center">
+              <Text className="text-xl font-bold text-primary">
                 {trip.collaborators.length}
               </Text>
               <Text className="text-xs text-muted-foreground mt-0.5">
                 {trip.collaborators.length === 1 ? 'Collaborator' : 'Collaborators'}
               </Text>
             </View>
-            <View className="flex-1 bg-muted rounded-xl p-4 items-center">
-              <Text className="text-xl font-bold text-foreground">{destinations.length}</Text>
+            <View className="flex-1 bg-primary-light rounded-xl p-4 items-center">
+              <Text className="text-xl font-bold text-primary">{destinations.length}</Text>
               <Text className="text-xs text-muted-foreground mt-0.5">
                 {destinations.length === 1 ? 'Destination' : 'Destinations'}
               </Text>
@@ -292,9 +293,9 @@ export default function TripDetailScreen({ route, navigation }: Props) {
                   <TouchableOpacity
                     onPress={() => navigation.navigate('Itinerary', { tripId })}
                     activeOpacity={0.7}
-                    className="flex-row items-center border border-border rounded-full px-3 py-1.5"
+                    className="flex-row items-center border border-primary rounded-full px-3 py-1.5"
                   >
-                    <Text className="text-foreground text-xs font-semibold">Itinerary</Text>
+                    <Text className="text-primary text-xs font-semibold">Itinerary</Text>
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
@@ -317,8 +318,8 @@ export default function TripDetailScreen({ route, navigation }: Props) {
                 scrollEnabled={false}
               />
             ) : (
-              <View className="border border-dashed border-border rounded-2xl p-6 items-center">
-                <Text className="text-2xl mb-2">📍</Text>
+              <View className="border border-dashed border-border rounded-2xl p-6 items-center bg-primary-light/40">
+                <Feather name="map-pin" size={28} color="#6366f1" style={{ marginBottom: 8, opacity: 0.6 }} />
                 <Text className="text-sm font-semibold text-foreground mb-1">
                   No destinations yet
                 </Text>
@@ -341,12 +342,14 @@ export default function TripDetailScreen({ route, navigation }: Props) {
               activeOpacity={0.8}
               className="bg-primary rounded-2xl px-4 py-3 flex-row items-center mb-3"
             >
-              <Text className="text-xl mr-3">🤖</Text>
+              <View className="w-8 h-8 rounded-full bg-white/20 items-center justify-center mr-3">
+                <Feather name="cpu" size={16} color="#ffffff" />
+              </View>
               <View className="flex-1">
                 <Text className="text-sm font-semibold text-white">AI Suggestions</Text>
                 <Text className="text-xs text-white/70 mt-0.5">Places curated for you</Text>
               </View>
-              <Text className="text-white/60 text-base">›</Text>
+              <Feather name="chevron-right" size={16} color="rgba(255,255,255,0.6)" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -354,12 +357,14 @@ export default function TripDetailScreen({ route, navigation }: Props) {
               activeOpacity={0.8}
               className="bg-surface border border-border rounded-2xl px-4 py-3 flex-row items-center"
             >
-              <Text className="text-xl mr-3">💬</Text>
+              <View className="w-8 h-8 rounded-full bg-primary-light items-center justify-center mr-3">
+                <Feather name="message-circle" size={16} color="#6366f1" />
+              </View>
               <View className="flex-1">
                 <Text className="text-sm font-semibold text-foreground">Ask AI Assistant</Text>
                 <Text className="text-xs text-muted-foreground mt-0.5">Chat about your trip</Text>
               </View>
-              <Text className="text-muted-foreground text-base">›</Text>
+              <Feather name="chevron-right" size={16} color="#a1a1aa" />
             </TouchableOpacity>
           </View>
 

@@ -347,7 +347,7 @@ export default function AIChatScreen({ route, navigation }: Props) {
               }`}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="#2563EB" />
+                <ActivityIndicator size="small" color="#006a66" />
               ) : (
                 <Text className="text-white font-bold" style={{ fontSize: 16 }}>
                   ↑

@@ -1,18 +1,18 @@
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
 export const COLORS = {
-  primary: '#2563EB',      // Blue 600
-  primaryDark: '#1D4ED8',  // Blue 700
-  primaryLight: '#DBEAFE', // Blue 100
-  secondary: '#10B981',    // Emerald 500
+  primary: '#006a66',
+  primaryDark: '#004e4a',
+  primaryLight: '#9cf1ec',
+  secondary: '#00677c',
   accent: '#F59E0B',       // Amber 500
-  background: '#F9FAFB',   // Gray 50
+  background: '#fdf9ec',
   surface: '#FFFFFF',
-  text: '#111827',         // Gray 900
-  textSecondary: '#6B7280',// Gray 500
-  border: '#E5E7EB',       // Gray 200
-  error: '#EF4444',        // Red 500
-  success: '#22C55E',      // Green 500
+  text: '#111827',
+  textSecondary: '#6b7280',
+  border: '#d4cdb8',
+  error: '#EF4444',        // Red 500 — unchanged
+  success: '#22C55E',      // Green 500 — unchanged
   warning: '#F59E0B',
 } as const;
 

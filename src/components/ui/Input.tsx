@@ -29,7 +29,7 @@ export function Input({
         {leftIcon && <View className="mr-2">{leftIcon}</View>}
         <TextInput
           className="flex-1 text-base text-foreground py-3"
-          placeholderTextColor="#A1A1AA"
+          placeholderTextColor="#9ca3a0"
           {...props}
         />
         {rightIcon && <View className="ml-2">{rightIcon}</View>}

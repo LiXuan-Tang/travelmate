@@ -70,7 +70,7 @@ export default function EditProfileScreen() {
             className="w-9 h-9 items-center justify-center"
             activeOpacity={0.65}
           >
-            <Ionicons name="chevron-back" size={22} color="#0A0A0A" />
+            <Ionicons name="chevron-back" size={22} color="#006a66" />
           </TouchableOpacity>
 
           <Text className="text-base font-semibold text-foreground">Edit Profile</Text>
@@ -105,11 +105,11 @@ export default function EditProfileScreen() {
                     resizeMode="cover"
                   />
                 ) : (
-                  <View className="w-24 h-24 rounded-full bg-foreground items-center justify-center">
+                  <View className="w-24 h-24 rounded-full bg-primary items-center justify-center">
                     <Text className="text-3xl font-bold text-white">{initial}</Text>
                   </View>
                 )}
-                <View className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary border-2 border-background items-center justify-center">
+                <View className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-secondary border-2 border-background items-center justify-center">
                   <Ionicons name="camera" size={14} color="#fff" />
                 </View>
               </View>
@@ -126,7 +126,7 @@ export default function EditProfileScreen() {
             <View>
               <Text className="text-sm font-medium text-foreground mb-1.5">Email</Text>
               <View className="flex-row items-center bg-muted border border-border rounded-xl px-4 py-3 opacity-60">
-                <Ionicons name="lock-closed-outline" size={15} color="#737373" style={{ marginRight: 8 }} />
+                <Ionicons name="lock-closed-outline" size={15} color="#006a66" style={{ marginRight: 8 }} />
                 <Text className="text-base text-muted-foreground flex-1">{profile?.email ?? ''}</Text>
               </View>
               <Text className="text-xs text-muted-foreground mt-1">
@@ -152,10 +152,10 @@ export default function EditProfileScreen() {
                   value={form.bio}
                   onChangeText={(v) => handleFieldChange('bio', v)}
                   placeholder="Tell others about yourself…"
-                  placeholderTextColor="#A1A1AA"
+                  placeholderTextColor="#9ca3a0"
                   multiline
                   maxLength={200}
-                  style={{ minHeight: 90, fontSize: 16, color: '#0A0A0A', textAlignVertical: 'top' }}
+                  style={{ minHeight: 90, fontSize: 16, color: '#111827', textAlignVertical: 'top' }}
                 />
               </View>
               <Text className="text-xs text-muted-foreground mt-1 text-right">

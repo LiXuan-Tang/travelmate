@@ -38,7 +38,7 @@ export default function TripsScreen() {
       <View className="flex-row justify-between items-center px-5 pt-7 pb-4">
         <Text className="text-2xl font-bold text-foreground tracking-tight">My Trips</Text>
         <TouchableOpacity
-          className="bg-foreground px-4 py-2 rounded-full"
+          className="bg-primary px-4 py-2 rounded-full"
           activeOpacity={0.8}
           onPress={handleNewTrip}
         >
@@ -48,7 +48,7 @@ export default function TripsScreen() {
 
       {isLoading && trips.length === 0 ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#0A0A0A" />
+          <ActivityIndicator size="large" color="#006a66" />
         </View>
       ) : (
         <FlatList
@@ -75,21 +75,18 @@ function SwipeableTripCard({ trip, navigation }: { trip: Trip; navigation: Nav }
       onMoveShouldSetPanResponder: (_, gestureState) =>
         Math.abs(gestureState.dx) > 6 && Math.abs(gestureState.dy) < 12,
       onPanResponderMove: (_, gestureState) => {
-        // Only allow left swipe (negative dx)
         if (gestureState.dx < 0) {
           translateX.setValue(Math.max(gestureState.dx, -DELETE_ZONE_WIDTH - 20));
         }
       },
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dx < -SWIPE_THRESHOLD) {
-          // Snap open to reveal delete zone
           Animated.spring(translateX, {
             toValue: -DELETE_ZONE_WIDTH,
             useNativeDriver: true,
             bounciness: 4,
           }).start();
         } else {
-          // Snap back
           Animated.spring(translateX, {
             toValue: 0,
             useNativeDriver: true,
@@ -168,7 +165,7 @@ function SwipeableTripCard({ trip, navigation }: { trip: Trip; navigation: Nav }
               resizeMode="cover"
             />
           ) : (
-            <View className="h-1.5 bg-foreground w-full" />
+            <View className="h-1.5 bg-primary w-full" />
           )}
 
           <View className="p-4">
@@ -207,7 +204,7 @@ function EmptyState({ onNewTrip }: { onNewTrip: () => void }) {
         Start planning your next adventure by creating your first trip.
       </Text>
       <TouchableOpacity
-        className="bg-foreground px-6 py-3 rounded-full"
+        className="bg-primary px-6 py-3 rounded-full"
         activeOpacity={0.8}
         onPress={onNewTrip}
       >
