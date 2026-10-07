@@ -136,6 +136,11 @@ export default function CommunityScreen() {
           onLike={() => likePost(item.id)}
           onSave={() => savePost(item.id)}
           onComment={() => handleNavigateToPost(item.id)}
+          onViewItinerary={
+            item.type === 'shared_itinerary'
+              ? () => handleNavigateToPost(item.id)
+              : undefined
+          }
         />
       );
     },

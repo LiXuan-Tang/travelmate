@@ -15,7 +15,6 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTripStore } from '@store/tripStore';
 import { useTrips } from '@hooks/useTrips';
-import { Badge } from '@components/ui';
 import { Trip, RootStackParamList } from '@app-types/index';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -123,6 +122,14 @@ function SwipeableTripCard({ trip, navigation }: { trip: Trip; navigation: Nav }
     navigation.navigate('TripDetail', { tripId: trip.id });
   }, [navigation, trip.id]);
 
+  // Hide delete tray when closed — otherwise web hover/press dimming on TouchableOpacity
+  // lets the destructive strip show through on the right.
+  const deleteZoneOpacity = translateX.interpolate({
+    inputRange: [-DELETE_ZONE_WIDTH - 20, -6, 0],
+    outputRange: [1, 1, 0],
+    extrapolate: 'clamp',
+  });
+
   const startDate = trip.startDate?.seconds
     ? new Date(trip.startDate.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '—';
@@ -133,9 +140,9 @@ function SwipeableTripCard({ trip, navigation }: { trip: Trip; navigation: Nav }
   return (
     <View className="mb-3 overflow-hidden rounded-2xl">
       {/* Delete zone revealed when swiped */}
-      <View
-        className="absolute right-0 top-0 bottom-0 bg-destructive items-center justify-center"
-        style={{ width: DELETE_ZONE_WIDTH }}
+      <Animated.View
+        className="absolute right-0 top-0 bottom-0 z-0 bg-destructive items-center justify-center"
+        style={{ width: DELETE_ZONE_WIDTH, opacity: deleteZoneOpacity }}
       >
         <TouchableOpacity
           onPress={handleDelete}
@@ -145,15 +152,16 @@ function SwipeableTripCard({ trip, navigation }: { trip: Trip; navigation: Nav }
           <Text className="text-white text-xl">🗑️</Text>
           <Text className="text-white text-xs font-medium mt-1">Delete</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Card (slides over the delete zone) */}
       <Animated.View
+        className="w-full z-[1]"
         style={{ transform: [{ translateX }] }}
         {...panResponder.panHandlers}
       >
         <TouchableOpacity
-          className="bg-surface border border-border rounded-2xl overflow-hidden"
+          className="w-full bg-surface border border-border rounded-2xl overflow-hidden"
           activeOpacity={0.7}
           onPress={handlePress}
         >
@@ -169,13 +177,10 @@ function SwipeableTripCard({ trip, navigation }: { trip: Trip; navigation: Nav }
           )}
 
           <View className="p-4">
-            <View className="flex-row items-start justify-between mb-1">
-              <Text className="text-sm font-semibold text-foreground flex-1 mr-2" numberOfLines={1}>
+            <View className="mb-1">
+              <Text className="text-sm font-semibold text-foreground" numberOfLines={1}>
                 {trip.title}
               </Text>
-              <Badge variant={trip.visibility === 'public' ? 'outline' : 'secondary'}>
-                {trip.visibility}
-              </Badge>
             </View>
             <Text className="text-xs text-muted-foreground">
               {startDate} — {endDate}

@@ -65,6 +65,11 @@ export interface Post {
   visibility: 'public' | 'private';
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  // Shared itinerary fields
+  type?: 'post' | 'shared_itinerary';
+  tripId?: string;
+  destinationCount?: number;
+  tripDuration?: string;
 }
 
 export interface Comment {
@@ -130,7 +135,6 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Trips: undefined;
-  Explore: undefined;
   Community: undefined;
   Profile: undefined;
 };
@@ -139,6 +143,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
   EditProfile: undefined;
+  AboutTravelMate: undefined;
   TripDetail: { tripId: string };
   TripForm: { tripId?: string };
   DestinationSearch: { tripId: string; targetDate?: string };
@@ -159,4 +164,6 @@ export type RootStackParamList = {
     preferences: string[];
   };
   AIIdeas: undefined;
+  /** Read-only view opened via deep link (travelmate://shared-trip/:postId) */
+  SharedTripDetail: { postId: string };
 };

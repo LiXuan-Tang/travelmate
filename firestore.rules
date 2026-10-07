@@ -34,9 +34,12 @@ service cloud.firestore {
       allow create: if request.auth != null;
       // Authors can update everything; any signed-in user can update likesCount
       // (e.g. when liking/unliking a post)
+      // Authors can edit the post; any signed-in user may bump likesCount or commentsCount
+      // (likes/shares feed counters; comments batch-update the parent post document).
       allow update: if request.auth != null && (
         resource.data.authorId == request.auth.uid ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount']) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentsCount'])
       );
       allow delete: if request.auth != null &&
         resource.data.authorId == request.auth.uid;

@@ -29,7 +29,6 @@ type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 
 const QUICK_ACTIONS: { label: string; icon: FeatherIconName }[] = [
   { label: 'New Trip', icon: 'navigation' },
-  { label: 'Explore', icon: 'compass' },
   { label: 'AI Ideas', icon: 'cpu' },
   { label: 'Community', icon: 'users' },
 ];
@@ -64,9 +63,6 @@ export default function HomeScreen() {
     switch (label) {
       case 'New Trip':
         navigation.navigate('TripForm', {});
-        break;
-      case 'Explore':
-        navigation.navigate('Explore');
         break;
       case 'AI Ideas':
         navigation.navigate('AIIdeas');

@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#111" />
+    </marker>
+    <style>
+      .box { fill: #fff; stroke: #222; stroke-width: 1.5; }
+      .line { stroke: #111; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+      .label { font: 14px Arial, sans-serif; fill: #111; }
+      .title { font: bold 15px Arial, sans-serif; fill: #111; }
+      .role { font: bold 14px Arial, sans-serif; fill: #111; }
+      .field { font: 14px Arial, sans-serif; fill: #111; }
+      .pk { text-decoration: underline; font-weight: bold; }
+      .groupTitle { font: bold 15px Arial, sans-serif; fill: #111; }
+    </style>
+  </defs>
+
+  <rect class="box" x="55" y="65" width="170" height="75" />
+  <text class="title" x="140" y="96" text-anchor="middle">Database Name:</text>
+  <text class="title" x="140" y="118" text-anchor="middle">TravelMate</text>
+
+  <g id="user">
+    <rect class="box" x="65" y="250" width="235" height="345" />
+    <rect class="box" x="65" y="250" width="235" height="34" />
+    <text class="title" x="182" y="272" text-anchor="middle">user</text>
+    <line x1="65" y1="318" x2="300" y2="318" stroke="#222" />
+    <line x1="112" y1="284" x2="112" y2="595" stroke="#222" />
+    <text class="role" x="88" y="307" text-anchor="middle">PK</text>
+    <text class="field pk" x="128" y="307">userId</text>
+    <text class="field" x="128" y="340">uid</text>
+    <text class="field" x="128" y="366">email</text>
+    <text class="field" x="128" y="392">displayName</text>
+    <text class="field" x="128" y="418">photoURL</text>
+    <text class="field" x="128" y="444">bio</text>
+    <text class="field" x="128" y="470">isAdmin</text>
+    <text class="field" x="128" y="496">likedPostIds</text>
+    <text class="field" x="128" y="522">savedPostIds</text>
+    <text class="field" x="128" y="548">createdAt</text>
+    <text class="field" x="128" y="574">updatedAt</text>
+  </g>
+
+  <g id="trip">
+    <rect class="box" x="430" y="170" width="250" height="350" />
+    <rect class="box" x="430" y="170" width="250" height="34" />
+    <text class="title" x="555" y="192" text-anchor="middle">trip</text>
+    <line x1="430" y1="238" x2="680" y2="238" stroke="#222" />
+    <line x1="482" y1="204" x2="482" y2="520" stroke="#222" />
+    <text class="role" x="456" y="227" text-anchor="middle">PK</text>
+    <text class="field pk" x="500" y="227">tripId</text>
+    <text class="role" x="456" y="260" text-anchor="middle">FK</text>
+    <text class="field" x="500" y="260">ownerId</text>
+    <text class="role" x="456" y="286" text-anchor="middle">FK</text>
+    <text class="field" x="500" y="286">collaboratorIds</text>
+    <text class="field" x="500" y="318">title</text>
+    <text class="field" x="500" y="344">coverImage</text>
+    <text class="field" x="500" y="370">startDate</text>
+    <text class="field" x="500" y="396">endDate</text>
+    <text class="field" x="500" y="422">visibility</text>
+    <text class="field" x="500" y="448">createdAt</text>
+    <text class="field" x="500" y="474">updatedAt</text>
+  </g>
+
+  <g id="destination">
+    <rect class="box" x="850" y="85" width="280" height="390" />
+    <rect class="box" x="850" y="85" width="280" height="34" />
+    <text class="title" x="990" y="107" text-anchor="middle">destination</text>
+    <line x1="850" y1="153" x2="1130" y2="153" stroke="#222" />
+    <line x1="902" y1="119" x2="902" y2="475" stroke="#222" />
+    <text class="role" x="876" y="142" text-anchor="middle">PK</text>
+    <text class="field pk" x="920" y="142">destinationId</text>
+    <text class="role" x="876" y="175" text-anchor="middle">FK</text>
+    <text class="field" x="920" y="175">tripId</text>
+    <text class="field" x="920" y="207">placeId</text>
+    <text class="field" x="920" y="233">name</text>
+    <text class="field" x="920" y="259">address</text>
+    <text class="field" x="920" y="285">photoReference</text>
+    <text class="field" x="920" y="311">lat</text>
+    <text class="field" x="920" y="337">lng</text>
+    <text class="field" x="920" y="363">date</text>
+    <text class="field" x="920" y="389">notes</text>
+    <text class="field" x="920" y="415">order</text>
+    <text class="field" x="920" y="441">createdAt</text>
+  </g>
+
+  <g id="post">
+    <rect class="box" x="430" y="585" width="285" height="280" />
+    <rect class="box" x="430" y="585" width="285" height="34" />
+    <text class="title" x="572" y="607" text-anchor="middle">post</text>
+    <line x1="430" y1="653" x2="715" y2="653" stroke="#222" />
+    <line x1="482" y1="619" x2="482" y2="865" stroke="#222" />
+    <text class="role" x="456" y="642" text-anchor="middle">PK</text>
+    <text class="field pk" x="500" y="642">postId</text>
+    <text class="role" x="456" y="675" text-anchor="middle">FK</text>
+    <text class="field" x="500" y="675">authorId</text>
+    <text class="role" x="456" y="701" text-anchor="middle">FK</text>
+    <text class="field" x="500" y="701">tripId</text>
+    <text class="field" x="500" y="733">title</text>
+    <text class="field" x="500" y="759">body</text>
+    <text class="field" x="500" y="785">images</text>
+    <text class="field" x="500" y="811">destination</text>
+    <text class="field" x="500" y="837">tags / visibility / type</text>
+  </g>
+
+  <g id="comment">
+    <rect class="box" x="850" y="595" width="250" height="205" />
+    <rect class="box" x="850" y="595" width="250" height="34" />
+    <text class="title" x="975" y="617" text-anchor="middle">comment</text>
+    <line x1="850" y1="663" x2="1100" y2="663" stroke="#222" />
+    <line x1="902" y1="629" x2="902" y2="800" stroke="#222" />
+    <text class="role" x="876" y="652" text-anchor="middle">PK</text>
+    <text class="field pk" x="920" y="652">commentId</text>
+    <text class="role" x="876" y="685" text-anchor="middle">FK</text>
+    <text class="field" x="920" y="685">postId</text>
+    <text class="role" x="876" y="711" text-anchor="middle">FK</text>
+    <text class="field" x="920" y="711">authorId</text>
+    <text class="field" x="920" y="743">text</text>
+    <text class="field" x="920" y="769">createdAt</text>
+  </g>
+
+  <path class="line" d="M300 335 H430" />
+  <text class="label" x="335" y="320">owns 0...*</text>
+
+  <path class="line" d="M300 375 H365 V212 H430" />
+  <text class="label" x="320" y="398">collaborates 0...*</text>
+
+  <path class="line" d="M680 275 H850" />
+  <text class="label" x="735" y="260">0...*</text>
+
+  <path class="line" d="M300 500 H380 V675 H430" />
+  <text class="label" x="312" y="520">authors 0...*</text>
+
+  <path class="line" d="M555 520 V585" />
+  <text class="label" x="570" y="555">0...*</text>
+
+  <path class="line" d="M715 685 H850" />
+  <text class="label" x="765" y="670">0...*</text>
+
+  <path class="line" d="M300 560 H350 V760 H850" />
+  <text class="label" x="325" y="585">writes 0...*</text>
+
+  <path class="line" d="M300 465 H390 V815 H430" />
+  <text class="label" x="305" y="452">likes/saves 0...*</text>
+</svg>

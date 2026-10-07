@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -12,17 +11,66 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList, Comment, UserProfile } from '@app-types/index';
+import { RootStackParamList, Comment, UserProfile, Destination } from '@app-types/index';
 import { useAuthStore } from '@store/authStore';
 import { useCommunityStore } from '@store/communityStore';
 import { useFeed, useComments, usePostActions } from '@hooks/usePosts';
 import { subscribeToComments } from '@services/firebase/posts';
+import { subscribeToDestinations } from '@services/firebase/destinations';
 import { getDocument } from '@services/firebase/firestore';
 import { COLLECTIONS } from '@constants/index';
+import { getPhotoUrl } from '@services/places';
+import { groupDestinationsByDay, ItineraryDay } from '@utils/itinerary';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PostDetail'>;
+
+// ─── Destination Row (read-only) ──────────────────────────────────────────────
+
+function DestinationRow({ item }: { item: Destination }) {
+  const photoUrl = item.photoReference ? getPhotoUrl(item.photoReference, 200) : null;
+  return (
+    <View className="flex-row items-center bg-muted border border-border rounded-2xl mb-2.5 overflow-hidden">
+      <View className="w-14 h-14 bg-primary-light shrink-0">
+        {photoUrl ? (
+          <Image source={{ uri: photoUrl }} className="w-full h-full" resizeMode="cover" />
+        ) : (
+          <View className="flex-1 items-center justify-center">
+            <Text style={{ fontSize: 18 }}>📍</Text>
+          </View>
+        )}
+      </View>
+      <View className="flex-1 px-3 py-2.5">
+        <Text className="text-sm font-semibold text-foreground" numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={2}>
+          {item.address}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+// ─── Day Section ─────────────────────────────────────────────────────────────
+
+function DaySection({ group }: { group: ItineraryDay }) {
+  return (
+    <View className="mb-4">
+      <View className="flex-row items-center gap-x-2 mb-2.5">
+        <View className="w-6 h-6 rounded-full bg-primary items-center justify-center">
+          <Text className="text-white text-xs font-bold">{group.day}</Text>
+        </View>
+        <Text className="text-sm font-bold text-foreground">Day {group.day}</Text>
+        <View className="flex-1 h-px bg-border ml-1" />
+      </View>
+      {group.items.map((d) => (
+        <DestinationRow key={d.id} item={d} />
+      ))}
+    </View>
+  );
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,6 +137,8 @@ function CommentRow({
 
 export default function PostDetailScreen({ route, navigation }: Props) {
   const { postId } = route.params;
+  const insets = useSafeAreaInsets();
+  const [screenHeaderHeight, setScreenHeaderHeight] = useState(0);
   const { user } = useAuthStore();
   const post = useCommunityStore((s) => s.posts.find((p) => p.id === postId));
 
@@ -99,6 +149,7 @@ export default function PostDetailScreen({ route, navigation }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [authors, setAuthors] = useState<Record<string, UserProfile>>({});
   const [commentText, setCommentText] = useState('');
+  const [sharedDestinations, setSharedDestinations] = useState<Destination[]>([]);
   const scrollRef = useRef<ScrollView>(null);
 
   // Real-time comments listener
@@ -106,6 +157,18 @@ export default function PostDetailScreen({ route, navigation }: Props) {
     const unsub = subscribeToComments(postId, setComments);
     return unsub;
   }, [postId]);
+
+  // Fetch destinations for shared itinerary posts
+  useEffect(() => {
+    if (!post?.tripId || post.type !== 'shared_itinerary') return;
+    const unsub = subscribeToDestinations(post.tripId, setSharedDestinations);
+    return unsub;
+  }, [post?.tripId, post?.type]);
+
+  const itineraryDays = useMemo(
+    () => groupDestinationsByDay(sharedDestinations),
+    [sharedDestinations],
+  );
 
   // Lazy-load author profiles
   useEffect(() => {
@@ -124,9 +187,16 @@ export default function PostDetailScreen({ route, navigation }: Props) {
 
   const handleSend = useCallback(async () => {
     if (!commentText.trim() || isSubmitting) return;
-    const text = commentText;
-    setCommentText('');
-    await addComment(text);
+    const text = commentText.trim();
+    const ok = await addComment(text);
+    if (ok) {
+      setCommentText('');
+    } else {
+      Alert.alert(
+        'Comment not sent',
+        'Something blocked saving your comment. Check your connection, then try again.',
+      );
+    }
   }, [commentText, isSubmitting, addComment]);
 
   const handleDeleteComment = useCallback(
@@ -162,7 +232,7 @@ export default function PostDetailScreen({ route, navigation }: Props) {
 
   if (!post) {
     return (
-      <SafeAreaView className="flex-1 bg-background items-center justify-center">
+      <SafeAreaView edges={['top']} className="flex-1 bg-background items-center justify-center">
         <Text className="text-muted-foreground text-sm">Post not found.</Text>
         <TouchableOpacity onPress={() => navigation.goBack()} className="mt-4">
           <Text className="text-sm font-semibold text-foreground">Go Back</Text>
@@ -178,13 +248,23 @@ export default function PostDetailScreen({ route, navigation }: Props) {
   const authorInitial = (postAuthor?.displayName ?? 'U').charAt(0).toUpperCase();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center justify-between px-5 pt-2 pb-3 border-b border-border">
+      <View
+        className="flex-row items-center justify-between px-5 pt-2 pb-3 border-b border-border"
+        onLayout={(e) => setScreenHeaderHeight(e.nativeEvent.layout.height)}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <Text className="text-base font-bold text-foreground">←</Text>
         </TouchableOpacity>
-        <Text className="text-base font-bold text-foreground">Post</Text>
+        {post.type === 'shared_itinerary' ? (
+          <View className="flex-row items-center gap-x-1.5">
+            <Text style={{ fontSize: 14 }}>🗺️</Text>
+            <Text className="text-base font-bold text-foreground">Shared Itinerary</Text>
+          </View>
+        ) : (
+          <Text className="text-base font-bold text-foreground">Post</Text>
+        )}
         <View className="flex-row items-center gap-x-3">
           <TouchableOpacity onPress={() => likePost(postId)} activeOpacity={0.7}>
             <Text style={{ fontSize: 20 }}>{isLiked ? '❤️' : '🤍'}</Text>
@@ -201,13 +281,17 @@ export default function PostDetailScreen({ route, navigation }: Props) {
       </View>
 
       <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'android' ? undefined : 'padding'}
+        keyboardVerticalOffset={
+          Platform.OS === 'ios' ? insets.top + screenHeaderHeight : 0
+        }
       >
         <ScrollView
           ref={scrollRef}
-          className="flex-1"
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 16 }}
         >
@@ -260,14 +344,39 @@ export default function PostDetailScreen({ route, navigation }: Props) {
               <Text className="text-sm text-foreground leading-6 mb-3">{post.body}</Text>
             )}
 
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
+            {/* Tags (hidden for shared itineraries) */}
+            {post.type !== 'shared_itinerary' && post.tags && post.tags.length > 0 && (
               <View className="flex-row flex-wrap gap-2 mb-4">
                 {post.tags.map((tag) => (
                   <View key={tag} className="bg-muted rounded-full px-3 py-1">
                     <Text className="text-xs text-muted-foreground">#{tag}</Text>
                   </View>
                 ))}
+              </View>
+            )}
+
+            {/* Itinerary section for shared_itinerary posts — grouped by day */}
+            {post.type === 'shared_itinerary' && (
+              <View className="mb-4">
+                <View className="flex-row items-center gap-x-2 mb-3">
+                  <Text className="text-sm font-bold text-foreground">Itinerary</Text>
+                  {post.tripDuration && (
+                    <View className="bg-primary-light rounded-full px-2.5 py-0.5 border border-primary/20">
+                      <Text className="text-xs font-medium text-primary">{post.tripDuration}</Text>
+                    </View>
+                  )}
+                </View>
+                {itineraryDays.length > 0 ? (
+                  itineraryDays.map((group) => (
+                    <DaySection key={group.day} group={group} />
+                  ))
+                ) : (
+                  <View className="border border-dashed border-border rounded-2xl p-4 items-center bg-primary-light/40">
+                    <Text className="text-xs text-muted-foreground text-center">
+                      No destinations added to this trip yet.
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
 
@@ -302,7 +411,10 @@ export default function PostDetailScreen({ route, navigation }: Props) {
         </ScrollView>
 
         {/* Comment input */}
-        <View className="flex-row items-end px-4 py-3 border-t border-border bg-surface gap-x-2">
+        <View
+          className="flex-row items-end px-4 pt-3 border-t border-border bg-surface gap-x-2"
+          style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+        >
           <TextInput
             className="flex-1 bg-muted rounded-2xl px-4 py-3 text-sm text-foreground"
             placeholder="Add a comment…"
@@ -316,6 +428,11 @@ export default function PostDetailScreen({ route, navigation }: Props) {
             blurOnSubmit
             onSubmitEditing={handleSend}
             editable={!isSubmitting}
+            onFocus={() => {
+              requestAnimationFrame(() =>
+                scrollRef.current?.scrollToEnd({ animated: true }),
+              );
+            }}
           />
           <TouchableOpacity
             onPress={handleSend}

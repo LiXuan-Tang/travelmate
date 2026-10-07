@@ -95,6 +95,7 @@ export interface PostCardProps {
   onLike: () => void;
   onSave: () => void;
   onComment: () => void;
+  onViewItinerary?: () => void;
 }
 
 export function PostCard({
@@ -106,8 +107,10 @@ export function PostCard({
   onLike,
   onSave,
   onComment,
+  onViewItinerary,
 }: PostCardProps) {
   const authorInitial = (author?.displayName ?? 'U').charAt(0).toUpperCase();
+  const isSharedItinerary = post.type === 'shared_itinerary';
 
   return (
     <TouchableOpacity
@@ -115,8 +118,16 @@ export function PostCard({
       onPress={onPress}
       className="bg-surface border border-border rounded-2xl mb-4 overflow-hidden"
     >
-      {/* Image carousel */}
-      <ImageCarousel images={post.images ?? []} title={post.title} />
+      {/* Shared Itinerary badge overlaid on image */}
+      <View style={{ position: 'relative' }}>
+        <ImageCarousel images={post.images ?? []} title={post.title} />
+        {isSharedItinerary && (
+          <View className="absolute top-3 left-3 bg-emerald-500 rounded-full px-3 py-1 flex-row items-center gap-x-1">
+            <Text style={{ fontSize: 10 }}>🗺️</Text>
+            <Text className="text-white text-xs font-bold">Shared Itinerary</Text>
+          </View>
+        )}
+      </View>
 
       {/* Author row */}
       <View className="flex-row items-center justify-between px-4 pt-3 pb-1">
@@ -160,14 +171,34 @@ export function PostCard({
         )}
       </View>
 
-      {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
+      {/* Tags (hidden for shared itineraries to avoid showing 'shared_itinerary' tag) */}
+      {!isSharedItinerary && post.tags && post.tags.length > 0 && (
         <View className="flex-row flex-wrap px-4 pb-2 gap-1">
           {post.tags.slice(0, 4).map((tag) => (
             <View key={tag} className="bg-muted rounded-full px-2.5 py-0.5">
               <Text className="text-xs text-muted-foreground">#{tag}</Text>
             </View>
           ))}
+        </View>
+      )}
+
+      {/* Shared itinerary stats */}
+      {isSharedItinerary && (
+        <View className="flex-row items-center px-4 pb-3 gap-x-3">
+          {post.destinationCount !== undefined && (
+            <View className="flex-row items-center gap-x-1">
+              <Text style={{ fontSize: 13 }}>📍</Text>
+              <Text className="text-xs text-muted-foreground font-medium">
+                {post.destinationCount} {post.destinationCount === 1 ? 'destination' : 'destinations'}
+              </Text>
+            </View>
+          )}
+          {post.tripDuration && (
+            <View className="flex-row items-center gap-x-1">
+              <Text style={{ fontSize: 13 }}>🗓️</Text>
+              <Text className="text-xs text-muted-foreground font-medium">{post.tripDuration}</Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -196,6 +227,17 @@ export function PostCard({
         </TouchableOpacity>
 
         <View className="flex-1" />
+
+        {isSharedItinerary && onViewItinerary && (
+          <TouchableOpacity
+            onPress={onViewItinerary}
+            activeOpacity={0.7}
+            className="flex-row items-center bg-primary-light rounded-full px-3 py-1.5 gap-x-1 border border-primary/20"
+          >
+            <Text className="text-xs font-semibold text-primary">View Itinerary</Text>
+            <Text className="text-xs text-primary">→</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity onPress={onSave} activeOpacity={0.7}>
           <Text style={{ fontSize: 16 }}>{isSaved ? '🔖' : '🏷️'}</Text>

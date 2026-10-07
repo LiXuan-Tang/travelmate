@@ -92,6 +92,54 @@ function groupIntoSections(
   }));
 }
 
+/** Ensures every calendar day of the trip appears as a section so empty days still show headers (e.g. AI Plan). */
+function expandSectionsWithTripDays(
+  grouped: ItinerarySection[],
+  trip: Trip | undefined,
+): ItinerarySection[] {
+  if (!trip?.startDate?.seconds || !trip?.endDate?.seconds) {
+    return grouped;
+  }
+
+  const tripStart = trip.startDate;
+  const groupedByKey = new Map(grouped.map((s) => [s.dateKey, s]));
+
+  const startMidnight = new Date(
+    new Date(trip.startDate.seconds * 1000).toDateString(),
+  ).getTime();
+  const endMidnight = new Date(
+    new Date(trip.endDate.seconds * 1000).toDateString(),
+  ).getTime();
+  const dayCount = Math.round((endMidnight - startMidnight) / 86400000) + 1;
+
+  const tripDateKeys = new Set<string>();
+  const result: ItinerarySection[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const d = new Date(startMidnight + i * 86400000);
+    const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    tripDateKeys.add(dateKey);
+    const existing = groupedByKey.get(dateKey);
+    if (existing) {
+      result.push(existing);
+    } else {
+      result.push({
+        dateKey,
+        title: formatSectionTitle(dateKey),
+        dayNumber: computeDayNumber(dateKey, tripStart),
+        data: [],
+      });
+    }
+  }
+
+  const extras = grouped
+    .filter((s) => s.dateKey !== 'unscheduled' && !tripDateKeys.has(s.dateKey))
+    .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+
+  const unsched = groupedByKey.get('unscheduled');
+  return [...result, ...extras, ...(unsched ? [unsched] : [])];
+}
+
 // ─── Section Header ───────────────────────────────────────────────────────────
 
 function SectionHeader({
@@ -445,7 +493,12 @@ function DestinationRow({
 // ─── Draggable Reorder List ───────────────────────────────────────────────────
 
 const HEADER_ROW_H = 44;
-const DEST_ROW_H = 76; // thumbnail(56) + vertical padding — no notes row in reorder mode
+/** Visual height of each reorder card (thumbnail row). */
+const DEST_ROW_H = 76;
+/** Extra vertical space between place cards in reorder mode. */
+const DEST_ROW_GAP = 16;
+/** Total vertical space reserved per destination row (card + gap below). */
+const DEST_ROW_SLOT_H = DEST_ROW_H + DEST_ROW_GAP;
 
 type FlatRow =
   | { kind: 'header'; dateKey: string; label: string; dayNumber: number | null }
@@ -472,13 +525,16 @@ function computeTops(rows: FlatRow[]): number[] {
   let y = 0;
   for (const row of rows) {
     tops.push(y);
-    y += row.kind === 'header' ? HEADER_ROW_H : DEST_ROW_H;
+    y += row.kind === 'header' ? HEADER_ROW_H : DEST_ROW_SLOT_H;
   }
   return tops;
 }
 
 function totalRowsHeight(rows: FlatRow[]): number {
-  return rows.reduce((sum, r) => sum + (r.kind === 'header' ? HEADER_ROW_H : DEST_ROW_H), 0);
+  return rows.reduce(
+    (sum, r) => sum + (r.kind === 'header' ? HEADER_ROW_H : DEST_ROW_SLOT_H),
+    0,
+  );
 }
 
 // Nearest dest-row slot to fingerCenterY — headers are invisible to the sort logic.
@@ -487,7 +543,7 @@ function nearestDestSlotAt(tops: number[], rows: FlatRow[], fingerCenterY: numbe
   let bestDist = Infinity;
   for (let i = 0; i < rows.length; i++) {
     if (rows[i].kind !== 'dest') continue;
-    const dist = Math.abs(fingerCenterY - (tops[i] + DEST_ROW_H / 2));
+    const dist = Math.abs(fingerCenterY - (tops[i] + DEST_ROW_SLOT_H / 2));
     if (dist < bestDist) {
       bestDist = dist;
       bestIdx = i;
@@ -634,13 +690,13 @@ function DraggableReorderList({ sections, onDone, onCancel }: DraggableReorderLi
       if (!d) return;
       const total = totalRowsHeight(rowsRef.current);
       const rawTop = d.initialItemTop + (pageY - d.startPageY);
-      const clampedTop = Math.max(0, Math.min(total - DEST_ROW_H, rawTop));
+      const clampedTop = Math.max(0, Math.min(total - DEST_ROW_SLOT_H, rawTop));
       floatY.setValue(clampedTop);
 
       const targetIdx = nearestDestSlotAt(
         topsRef.current,
         rowsRef.current,
-        clampedTop + DEST_ROW_H / 2,
+        clampedTop + DEST_ROW_SLOT_H / 2,
       );
       if (targetIdx !== -1 && targetIdx !== d.flatIdx) {
         const next = [...rowsRef.current];
@@ -735,7 +791,7 @@ function DraggableReorderList({ sections, onDone, onCancel }: DraggableReorderLi
                   left: 0,
                   right: 0,
                   top,
-                  height: DEST_ROW_H,
+                  height: DEST_ROW_SLOT_H,
                   opacity: isActive ? 0 : 1,
                 }}
               >
@@ -795,7 +851,15 @@ export default function ItineraryScreen({ route, navigation }: Props) {
   const [selectedDayKey, setSelectedDayKey] = useState<string>('all');
   const [reorderMode, setReorderMode] = useState(false);
 
-  const sections = groupIntoSections(destinations, trip?.startDate);
+  const groupedSections = useMemo(
+    () => groupIntoSections(destinations, trip?.startDate),
+    [destinations, trip?.startDate],
+  );
+
+  const sections = useMemo(
+    () => expandSectionsWithTripDays(groupedSections, trip),
+    [groupedSections, trip],
+  );
 
   // Generate one tab per actual trip day using the same local-midnight normalisation
   // that computeDayNumber uses, so dateKeys are guaranteed to match section dateKeys.
@@ -814,6 +878,8 @@ export default function ItineraryScreen({ route, navigation }: Props) {
       return { key: dateKey, label: `Day ${i + 1}` };
     });
   }, [trip]);
+
+  const showItineraryShell = tripDayTabs.length > 0 || destinations.length > 0;
 
   const dayTabs = useMemo(
     () => [{ key: 'all', label: 'All' }, ...tripDayTabs],
@@ -1082,7 +1148,7 @@ export default function ItineraryScreen({ route, navigation }: Props) {
       </View>
 
       {/* Day selector pills */}
-      {sections.length > 0 && (
+      {tripDayTabs.length > 0 && (
         <View className="border-b border-border">
           <ScrollView
             horizontal
@@ -1115,12 +1181,12 @@ export default function ItineraryScreen({ route, navigation }: Props) {
       )}
 
       {/* Content */}
-      {destinations.length === 0 ? (
+      {!showItineraryShell ? (
         <View className="flex-1 items-center justify-center px-8 pt-20">
           <Text className="text-3xl mb-3">📍</Text>
           <Text className="text-base font-semibold text-foreground mb-1">No destinations yet</Text>
           <Text className="text-sm text-muted-foreground text-center leading-5">
-            Add destinations from the trip detail screen, then come back to organise your itinerary.
+            Add trip dates or destinations from the trip detail screen, then plan your itinerary here.
           </Text>
         </View>
       ) : displayedSections.length === 0 ? (
@@ -1130,15 +1196,30 @@ export default function ItineraryScreen({ route, navigation }: Props) {
           <Text className="text-xs text-muted-foreground text-center leading-5 mb-5">
             No destinations scheduled for this day.
           </Text>
-          {validSelectedKey !== 'all' && (
-            <TouchableOpacity
-              onPress={() => handleAddToDay(validSelectedKey)}
-              activeOpacity={0.75}
-              className="bg-primary rounded-2xl px-6 py-3"
-            >
-              <Text className="text-sm font-semibold text-white">+ Add Place</Text>
-            </TouchableOpacity>
-          )}
+          {validSelectedKey !== 'all' &&
+            (() => {
+              const emptyDayNum = computeDayNumber(validSelectedKey, trip?.startDate);
+              return (
+                <View className="flex-row flex-wrap items-center justify-center gap-2">
+                  {emptyDayNum != null && (
+                    <TouchableOpacity
+                      onPress={() => handleOpenDayPlan(emptyDayNum)}
+                      activeOpacity={0.75}
+                      className="bg-primary-light border border-primary/30 rounded-2xl px-6 py-3"
+                    >
+                      <Text className="text-sm font-semibold text-primary">AI Plan</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => handleAddToDay(validSelectedKey)}
+                    activeOpacity={0.75}
+                    className="bg-primary rounded-2xl px-6 py-3"
+                  >
+                    <Text className="text-sm font-semibold text-white">+ Add Place</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })()}
         </View>
       ) : (
         <View className="flex-1">
@@ -1173,14 +1254,16 @@ export default function ItineraryScreen({ route, navigation }: Props) {
             </TouchableOpacity>
 
             {/* Reorder FAB */}
-            <TouchableOpacity
-              onPress={() => setReorderMode(true)}
-              activeOpacity={0.85}
-              className="bg-secondary rounded-full px-5 py-3 flex-row items-center"
-              style={{ elevation: 4 }}
-            >
-              <Text className="text-white text-xs font-semibold">⇅  Reorder</Text>
-            </TouchableOpacity>
+            {destinations.length > 0 && (
+              <TouchableOpacity
+                onPress={() => setReorderMode(true)}
+                activeOpacity={0.85}
+                className="bg-secondary rounded-full px-5 py-3 flex-row items-center"
+                style={{ elevation: 4 }}
+              >
+                <Text className="text-white text-xs font-semibold">⇅  Reorder</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       )}

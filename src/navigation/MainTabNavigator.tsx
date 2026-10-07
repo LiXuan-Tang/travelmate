@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { MainTabParamList } from '@app-types/index';
 import HomeScreen from '@screens/tabs/home/HomeScreen';
 import TripsScreen from '@screens/tabs/trips/TripsScreen';
-import ExploreScreen from '@screens/tabs/explore/ExploreScreen';
 import CommunityScreen from '@screens/tabs/community/CommunityScreen';
 import ProfileScreen from '@screens/tabs/profile/ProfileScreen';
 
@@ -15,7 +14,6 @@ type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 const TAB_ICONS: Record<string, { outline: IoniconName; filled: IoniconName }> = {
   Home: { outline: 'home-outline', filled: 'home' },
   Trips: { outline: 'airplane-outline', filled: 'airplane' },
-  Explore: { outline: 'compass-outline', filled: 'compass' },
   Community: { outline: 'people-outline', filled: 'people' },
   Profile: { outline: 'person-outline', filled: 'person' },
 };
@@ -54,7 +52,6 @@ export default function MainTabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Trips" component={TripsScreen} />
-      <Tab.Screen name="Explore" component={ExploreScreen} />
       <Tab.Screen name="Community" component={CommunityScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

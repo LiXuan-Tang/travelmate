@@ -7,6 +7,7 @@ import { useAuthStore } from '@store/authStore';
 import AuthNavigator from './AuthNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import EditProfileScreen from '@screens/profile/EditProfileScreen';
+import AboutTravelMateScreen from '@screens/profile/AboutTravelMateScreen';
 import TripDetailScreen from '@screens/trips/TripDetailScreen';
 import TripFormScreen from '@screens/trips/TripFormScreen';
 import DestinationSearchScreen from '@screens/trips/DestinationSearchScreen';
@@ -16,6 +17,7 @@ import AIChatScreen from '@screens/trips/AIChatScreen';
 import AIIdeasScreen from '@screens/trips/AIIdeasScreen';
 import PostDetailScreen from '@screens/trips/PostDetailScreen';
 import PostFormScreen from '@screens/trips/PostFormScreen';
+import SharedTripDetailScreen from '@screens/trips/SharedTripDetailScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -38,6 +40,11 @@ export default function RootNavigator() {
           <Stack.Screen
             name="EditProfile"
             component={EditProfileScreen}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="AboutTravelMate"
+            component={AboutTravelMateScreen}
             options={{ animation: 'slide_from_right' }}
           />
           <Stack.Screen
@@ -89,6 +96,12 @@ export default function RootNavigator() {
       ) : (
         <Stack.Screen name="Auth" component={AuthNavigator} />
       )}
+      {/* Always accessible — opened via deep link regardless of auth state */}
+      <Stack.Screen
+        name="SharedTripDetail"
+        component={SharedTripDetailScreen}
+        options={{ animation: 'slide_from_bottom' }}
+      />
     </Stack.Navigator>
   );
 }

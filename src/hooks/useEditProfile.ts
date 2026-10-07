@@ -2,33 +2,22 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 import { useAuthStore } from '@store/authStore';
-import { updateDocument } from '@services/firebase/firestore';
-import { uploadImage } from '@services/firebase/storage';
-import { COLLECTIONS } from '@constants/index';
+import { updateProfile as updateProfileService } from '@services/profile';
+import { validateProfileForm } from '@utils/profileValidation';
 
 export interface EditProfileForm {
   displayName: string;
   bio: string;
 }
 
-export interface EditProfileFormErrors {
-  displayName?: string;
-}
+export { ProfileFormErrors as EditProfileFormErrors } from '@utils/profileValidation';
 
 export function useEditProfile() {
   const { profile, setProfile } = useAuthStore();
   const [saving, setSaving] = useState(false);
   const [localAvatarUri, setLocalAvatarUri] = useState<string | null>(null);
 
-  const validate = (form: EditProfileForm): EditProfileFormErrors => {
-    const errors: EditProfileFormErrors = {};
-    if (!form.displayName.trim()) {
-      errors.displayName = 'Display name is required.';
-    } else if (form.displayName.trim().length > 50) {
-      errors.displayName = 'Display name must be 50 characters or less.';
-    }
-    return errors;
-  };
+  const validate = (form: EditProfileForm) => validateProfileForm(form);
 
   const pickAvatar = async (): Promise<void> => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -57,28 +46,13 @@ export function useEditProfile() {
 
     setSaving(true);
     try {
-      let photoURL = profile.photoURL;
-
-      if (localAvatarUri) {
-        photoURL = await uploadImage(
-          localAvatarUri,
-          `users/${profile.uid}/avatar/profile.jpg`,
-        );
-      }
-
-      await updateDocument(COLLECTIONS.USERS, profile.uid, {
-        displayName: form.displayName.trim(),
-        bio: form.bio.trim(),
-        photoURL,
-      });
-
-      setProfile({
-        ...profile,
-        displayName: form.displayName.trim(),
-        bio: form.bio.trim(),
-        photoURL,
-      });
-
+      const updated = await updateProfileService(
+        profile,
+        form.displayName,
+        form.bio,
+        localAvatarUri,
+      );
+      setProfile(updated);
       return true;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save profile.';

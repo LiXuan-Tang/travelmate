@@ -67,6 +67,12 @@ export const subscribeToUserPosts = (
 export const createPost = async (
   data: Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'likesCount' | 'commentsCount'>,
 ): Promise<string> => {
+  if (!data.title?.trim()) {
+    throw new Error('Post title is required');
+  }
+  if (!data.body?.trim() && data.type !== 'shared_itinerary') {
+    throw new Error('Post description is required');
+  }
   const ref = await addDoc(collection(db, COLLECTIONS.POSTS), {
     ...data,
     likesCount: 0,
@@ -158,6 +164,9 @@ export const addComment = async (
   uid: string,
   text: string,
 ): Promise<string> => {
+  if (!text?.trim()) {
+    throw new Error('Comment cannot be empty');
+  }
   const batch = writeBatch(db);
   const commentRef = doc(
     collection(db, COLLECTIONS.POSTS, postId, COLLECTIONS.COMMENTS),

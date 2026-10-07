@@ -80,6 +80,9 @@ export async function optimizeTrip(params: OptimizeTripParams): Promise<Optimize
 }
 
 export async function chatAssistant(params: ChatAssistantParams): Promise<string> {
+  if (!params.userMessage?.trim()) {
+    throw new Error('Chat message cannot be empty');
+  }
   const fn = httpsCallable<ChatAssistantParams, { reply: string }>(fns, 'chatAssistant');
   const result = await fn(params);
   return result.data.reply;

@@ -23,7 +23,12 @@ export const subscribeToDestinations = (
 export const addDestination = async (
   tripId: string,
   data: Omit<Destination, 'id' | 'createdAt'>,
-): Promise<string> => createDocument(destPath(tripId), data);
+): Promise<string> => {
+  if (!data.placeId?.trim() || !data.name?.trim()) {
+    throw new Error('A valid place with a name is required');
+  }
+  return createDocument(destPath(tripId), data);
+};
 
 export const updateDestination = async (
   tripId: string,

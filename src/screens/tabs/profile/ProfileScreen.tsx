@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Image, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,17 +23,30 @@ export default function ProfileScreen() {
   const { profile } = useAuthStore();
   const initial = (profile?.displayName?.[0] ?? '?').toUpperCase();
 
-  const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: async () => {
-          await logoutUser();
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed =
+      Platform.OS === 'web'
+        ? typeof window !== 'undefined' && window.confirm('Sign out from TravelMate?')
+        : await new Promise<boolean>((resolve) => {
+            Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+              { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+              {
+                text: 'Sign Out',
+                style: 'destructive',
+                onPress: () => resolve(true),
+              },
+            ]);
+          });
+
+    if (!confirmed) return;
+
+    try {
+      await logoutUser();
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Could not sign out';
+      if (Platform.OS === 'web') window.alert(message);
+      else Alert.alert('Sign Out Failed', message);
+    }
   };
 
   const menuItems: MenuItem[] = [
@@ -43,16 +56,9 @@ export default function ProfileScreen() {
       onPress: () => navigation.navigate('EditProfile'),
     },
     {
-      label: 'Privacy Settings',
-      icon: 'lock-closed-outline',
-    },
-    {
-      label: 'Notifications',
-      icon: 'notifications-outline',
-    },
-    {
       label: 'About TravelMate',
       icon: 'information-circle-outline',
+      onPress: () => navigation.navigate('AboutTravelMate'),
     },
   ];
 

@@ -7,3 +7,6 @@ export { DatePickerModal } from './DatePickerModal';
 export { AISuggestionCard } from './AISuggestionCard';
 export { PostCard } from './PostCard';
 export type { PostCardProps } from './PostCard';
+export { ShareTripModal } from './ShareTripModal';
+export type { ShareOption } from './ShareTripModal';
+export { AccountContinueModal } from './AccountContinueModal';

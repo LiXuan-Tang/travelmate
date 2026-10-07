@@ -10,13 +10,12 @@ import {
   updateTrip as firestoreUpdateTrip,
   deleteTrip as firestoreDeleteTrip,
 } from '@services/firebase/trips';
-import { Trip, TripVisibility } from '@app-types/index';
+import { Trip } from '@app-types/index';
 
 export interface TripFormData {
   title: string;
   startDate: Date;
   endDate: Date;
-  visibility: TripVisibility;
   coverImageUri?: string | null;
 }
 
@@ -53,7 +52,7 @@ export const useTrips = ({ subscribe = true }: { subscribe?: boolean } = {}) => 
           coverImage,
           startDate: Timestamp.fromDate(formData.startDate),
           endDate: Timestamp.fromDate(formData.endDate),
-          visibility: formData.visibility,
+          visibility: 'private',
           ownerId: user.uid,
           collaborators: [],
         });
@@ -100,7 +99,6 @@ export const useTrips = ({ subscribe = true }: { subscribe?: boolean } = {}) => 
           coverImage,
           startDate: Timestamp.fromDate(formData.startDate),
           endDate: Timestamp.fromDate(formData.endDate),
-          visibility: formData.visibility,
         });
 
         updateTrip(tripId, {
@@ -108,7 +106,6 @@ export const useTrips = ({ subscribe = true }: { subscribe?: boolean } = {}) => 
           coverImage,
           startDate: Timestamp.fromDate(formData.startDate),
           endDate: Timestamp.fromDate(formData.endDate),
-          visibility: formData.visibility,
         });
 
         return true;

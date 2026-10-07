@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["REPLACE_WITH_YOUR_TEAM_ID.com.lixuan.travelmate"],
+        "components": [
+          { "/": "/trip/*", "comment": "Shared trip deep links" }
+        ]
+      }
+    ]
+  }
+}

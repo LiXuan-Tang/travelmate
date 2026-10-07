@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList, TripVisibility } from '@app-types/index';
+import { RootStackParamList } from '@app-types/index';
 import { useTripStore } from '@store/tripStore';
 import { useTrips } from '@hooks/useTrips';
 import { Input, Button, DatePickerModal } from '@components/ui';
@@ -20,12 +20,6 @@ import { Input, Button, DatePickerModal } from '@components/ui';
 type Props = NativeStackScreenProps<RootStackParamList, 'TripForm'>;
 
 type DateField = 'startDate' | 'endDate';
-
-const VISIBILITY_OPTIONS: { value: TripVisibility; label: string; description: string }[] = [
-  { value: 'private', label: 'Private', description: 'Only you' },
-  { value: 'shared', label: 'Shared', description: 'With collaborators' },
-  { value: 'public', label: 'Public', description: 'Everyone' },
-];
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -96,7 +90,7 @@ export default function TripFormScreen({ route, navigation }: Props) {
   const handleSave = useCallback(async () => {
     if (!validate()) return;
 
-    const formData = { title, startDate, endDate, visibility, coverImageUri };
+    const formData = { title, startDate, endDate, coverImageUri };
 
     if (isEditing && tripId) {
       const success = await editTrip(tripId, formData, existingTrip?.coverImage);
@@ -105,7 +99,7 @@ export default function TripFormScreen({ route, navigation }: Props) {
       const id = await createTrip(formData);
       if (id) navigation.goBack();
     }
-  }, [title, startDate, endDate, visibility, coverImageUri, isEditing, tripId]);
+  }, [title, startDate, endDate, coverImageUri, isEditing, tripId, existingTrip?.coverImage, createTrip, editTrip, navigation]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
@@ -194,35 +188,6 @@ export default function TripFormScreen({ route, navigation }: Props) {
               <Text className="text-xs text-muted-foreground mb-0.5">End Date</Text>
               <Text className="text-sm font-semibold text-foreground">{formatDate(endDate)}</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Visibility */}
-          <Text className="text-sm font-medium text-foreground mb-1.5">Visibility</Text>
-          <View className="flex-row gap-x-2 mb-6">
-            {VISIBILITY_OPTIONS.map((opt) => {
-              const isSelected = visibility === opt.value;
-              return (
-                <TouchableOpacity
-                  key={opt.value}
-                  onPress={() => setVisibility(opt.value)}
-                  activeOpacity={0.7}
-                  className={`flex-1 rounded-xl border py-3 px-2 items-center ${
-                    isSelected ? 'bg-primary border-primary' : 'bg-muted border-border'
-                  }`}
-                >
-                  <Text
-                    className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-foreground'}`}
-                  >
-                    {opt.label}
-                  </Text>
-                  <Text
-                    className={`text-xs mt-0.5 ${isSelected ? 'text-white/70' : 'text-muted-foreground'}`}
-                  >
-                    {opt.description}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
           </View>
 
           {isLoading && (

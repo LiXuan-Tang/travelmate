@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { Share } from 'react-native';
 import { QueryDocumentSnapshot } from 'firebase/firestore';
 import { useAuthStore } from '@store/authStore';
 import { useCommunityStore } from '@store/communityStore';
@@ -14,7 +15,9 @@ import {
   addComment as firestoreAddComment,
   deleteComment as firestoreDeleteComment,
 } from '@services/firebase/posts';
-import { Post } from '@app-types/index';
+import { generateShareLink } from '@services/firebase/dynamicLinks';
+import { Post, Trip, Destination } from '@app-types/index';
+import { ShareOption } from '@components/ui';
 
 export interface PostFormData {
   title: string;
@@ -264,7 +267,104 @@ export const usePostActions = () => {
     [removePost],
   );
 
-  return { isLoading, error, pickImages, createPost, editPost, deletePost };
+  const shareTrip = useCallback(
+    async (
+      trip: Trip,
+      destinations: Destination[],
+      caption: string,
+      option: ShareOption,
+    ): Promise<string | null> => {
+      if (!user) return null;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const startSeconds = trip.startDate?.seconds;
+        const endSeconds = trip.endDate?.seconds;
+        const durationDays =
+          startSeconds && endSeconds
+            ? Math.ceil((endSeconds - startSeconds) / 86400) + 1
+            : null;
+        const tripDuration = durationDays
+          ? durationDays === 1
+            ? '1 day'
+            : `${durationDays} days`
+          : undefined;
+
+        if (option === 'community') {
+          // ── Publish to Community ─────────────────────────────────────────────
+          // Creates a public post visible in the community feed.
+          const postId = await firestoreCreatePost({
+            authorId: user.uid,
+            title: trip.title,
+            body: caption,
+            destination: destinations[0]?.name ?? '',
+            tags: ['shared_itinerary'],
+            visibility: 'public',
+            images: trip.coverImage ? [trip.coverImage] : [],
+            type: 'shared_itinerary',
+            tripId: trip.id,
+            destinationCount: destinations.length,
+            tripDuration,
+          });
+
+          const newPost: Post = {
+            id: postId,
+            authorId: user.uid,
+            title: trip.title,
+            body: caption,
+            destination: destinations[0]?.name ?? '',
+            tags: ['shared_itinerary'],
+            visibility: 'public',
+            images: trip.coverImage ? [trip.coverImage] : [],
+            likesCount: 0,
+            commentsCount: 0,
+            createdAt: null as never,
+            updatedAt: null as never,
+            type: 'shared_itinerary',
+            tripId: trip.id,
+            destinationCount: destinations.length,
+            tripDuration,
+          };
+          // Optimistically add to community store so it appears in "My Posts"
+          addPost(newPost);
+          return postId;
+        } else {
+          // ── Generate Share Link ──────────────────────────────────────────────
+          // Creates a private post (hidden from community feed) purely to
+          // back the shareable URL. Does NOT push to the community store.
+          const postId = await firestoreCreatePost({
+            authorId: user.uid,
+            title: trip.title,
+            body: caption,
+            destination: destinations[0]?.name ?? '',
+            tags: ['shared_itinerary'],
+            visibility: 'private',
+            images: trip.coverImage ? [trip.coverImage] : [],
+            type: 'shared_itinerary',
+            tripId: trip.id,
+            destinationCount: destinations.length,
+            tripDuration,
+          });
+
+          const shareUrl = generateShareLink(postId);
+          await Share.share({
+            title: trip.title,
+            url: shareUrl,
+            message: `Check out my travel plan "${trip.title}" on TravelMate: ${shareUrl}`,
+          });
+          return postId;
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to share trip');
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [user, addPost],
+  );
+
+  return { isLoading, error, pickImages, createPost, editPost, deletePost, shareTrip };
 };
 
 // ─── Comments ─────────────────────────────────────────────────────────────────

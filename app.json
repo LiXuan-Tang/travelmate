@@ -13,9 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:travelmate-2f670.web.app"]
     },
     "android": {
+      "softwareKeyboardLayoutMode": "resize",
       "package": "com.lixuan.travelmate",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
@@ -24,7 +26,21 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "travelmate-2f670.web.app",
+              "pathPrefix": "/trip"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,7 +48,7 @@
     "plugins": [
       "expo-dev-client",
       "expo-web-browser",
-      "@react-native-google-signin/google-signin",
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "eas": {

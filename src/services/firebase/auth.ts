@@ -48,6 +48,7 @@ const upsertUserDoc = async (user: User): Promise<void> => {
 export const signInWithGoogle = async (): Promise<User> => {
   if (Platform.OS === 'web') {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     const { user } = await signInWithPopup(auth, provider);
     await upsertUserDoc(user);
     return user;
@@ -58,6 +59,12 @@ export const signInWithGoogle = async (): Promise<User> => {
   }
 
   await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  // Clear cached Google account so the system account picker appears each time.
+  try {
+    await GoogleSignin.signOut();
+  } catch {
+    /* no-op if nothing to sign out */
+  }
   const response = await GoogleSignin.signIn();
 
   if (!isSuccessResponse(response)) {

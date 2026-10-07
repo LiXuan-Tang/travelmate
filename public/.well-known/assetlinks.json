@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.lixuan.travelmate",
+      "sha256_cert_fingerprints": [
+        "6D:11:34:24:16:FD:F6:52:0E:09:4A:43:27:19:20:BC:41:4A:5C:07:B0:14:CD:04:FD:8B:F5:66:0C:D6:86:8A"
+      ]
+    }
+  }
+]

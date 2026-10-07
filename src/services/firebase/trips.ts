@@ -52,6 +52,15 @@ export const subscribeToUserTrips = (
 export const createTrip = async (
   data: Omit<Trip, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<string> => {
+  if (!data.title?.trim()) {
+    throw new Error('Trip title is required');
+  }
+  if (!data.startDate) {
+    throw new Error('Trip start date is required');
+  }
+  if (!data.endDate) {
+    throw new Error('Trip end date is required');
+  }
   return createDocument(COLLECTIONS.TRIPS, data);
 };
 

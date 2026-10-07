@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,9 @@ import { RootStackParamList, Destination } from '@app-types/index';
 import { useTripStore } from '@store/tripStore';
 import { useTrips } from '@hooks/useTrips';
 import { useDestinations } from '@hooks/useDestinations';
-import { Badge, Button } from '@components/ui';
+import { usePostActions } from '@hooks/usePosts';
+import { Button, ShareTripModal } from '@components/ui';
+import { ShareOption } from '@components/ui';
 import { getPhotoUrl } from '@services/places';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TripDetail'>;
@@ -32,12 +34,6 @@ const getTripDuration = (startSeconds: number, endSeconds: number) => {
   const diff = endSeconds - startSeconds;
   const days = Math.ceil(diff / 86400) + 1;
   return days === 1 ? '1 day' : `${days} days`;
-};
-
-const VISIBILITY_BADGE: Record<string, 'outline' | 'secondary' | 'success'> = {
-  public: 'outline',
-  shared: 'success',
-  private: 'secondary',
 };
 
 function DestinationCard({
@@ -89,6 +85,8 @@ export default function TripDetailScreen({ route, navigation }: Props) {
   const trip = useTripStore((s) => s.trips.find((t) => t.id === tripId));
   const { deleteTrip, isLoading } = useTrips({ subscribe: false });
   const { destinations, removeDestination } = useDestinations(tripId);
+  const { shareTrip, isLoading: isSharing } = usePostActions();
+  const [shareModalVisible, setShareModalVisible] = useState(false);
 
   const handleEdit = useCallback(() => {
     navigation.navigate('TripForm', { tripId });
@@ -170,6 +168,23 @@ export default function TripDetailScreen({ route, navigation }: Props) {
     );
   }, [trip, tripId, deleteTrip, navigation]);
 
+  const handleShare = useCallback(
+    async (caption: string, option: ShareOption) => {
+      if (!trip) return;
+      const postId = await shareTrip(trip, destinations, caption, option);
+      setShareModalVisible(false);
+      if (postId) {
+        Alert.alert(
+          option === 'community' ? 'Published!' : 'Shared!',
+          option === 'community'
+            ? 'Your travel plan has been published to the community feed.'
+            : 'Use the share sheet to copy the link or send your plan. It was not published to the community feed.',
+        );
+      }
+    },
+    [trip, destinations, shareTrip],
+  );
+
   if (!trip) {
     return (
       <SafeAreaView className="flex-1 bg-background items-center justify-center">
@@ -185,7 +200,6 @@ export default function TripDetailScreen({ route, navigation }: Props) {
     trip.startDate?.seconds && trip.endDate?.seconds
       ? getTripDuration(trip.startDate.seconds, trip.endDate.seconds)
       : '—';
-  const badgeVariant = VISIBILITY_BADGE[trip.visibility] ?? 'secondary';
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
@@ -208,7 +222,7 @@ export default function TripDetailScreen({ route, navigation }: Props) {
             </View>
           )}
 
-          {/* Back + Edit buttons overlaid on image */}
+          {/* Back + Share + Edit buttons overlaid on image */}
           <View className="absolute top-0 left-0 right-0 flex-row justify-between items-center px-4 pt-14">
             <TouchableOpacity
               className="bg-black/40 rounded-full w-9 h-9 items-center justify-center"
@@ -217,13 +231,23 @@ export default function TripDetailScreen({ route, navigation }: Props) {
             >
               <Text className="text-white font-bold text-base">←</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-black/40 rounded-full px-4 py-1.5"
-              onPress={handleEdit}
-              activeOpacity={0.7}
-            >
-              <Text className="text-white text-xs font-semibold">Edit</Text>
-            </TouchableOpacity>
+            <View className="flex-row items-center gap-x-2">
+              <TouchableOpacity
+                className="bg-black/40 rounded-full px-4 py-1.5 flex-row items-center gap-x-1.5"
+                onPress={() => setShareModalVisible(true)}
+                activeOpacity={0.7}
+              >
+                <Feather name="share-2" size={12} color="#ffffff" />
+                <Text className="text-white text-xs font-semibold">Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-black/40 rounded-full px-4 py-1.5"
+                onPress={handleEdit}
+                activeOpacity={0.7}
+              >
+                <Text className="text-white text-xs font-semibold">Edit</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Duration pill */}
@@ -234,9 +258,8 @@ export default function TripDetailScreen({ route, navigation }: Props) {
 
         {/* Trip Info */}
         <View className="px-5 pt-5">
-          <View className="flex-row items-start justify-between mb-3">
-            <Text className="text-2xl font-bold text-foreground flex-1 mr-3">{trip.title}</Text>
-            <Badge variant={badgeVariant}>{trip.visibility}</Badge>
+          <View className="mb-3">
+            <Text className="text-2xl font-bold text-foreground">{trip.title}</Text>
           </View>
 
           {/* Date Range */}
@@ -267,14 +290,6 @@ export default function TripDetailScreen({ route, navigation }: Props) {
             <View className="flex-1 bg-primary-light rounded-xl p-4 items-center">
               <Text className="text-xl font-bold text-primary">{duration}</Text>
               <Text className="text-xs text-muted-foreground mt-0.5">Duration</Text>
-            </View>
-            <View className="flex-1 bg-primary-light rounded-xl p-4 items-center">
-              <Text className="text-xl font-bold text-primary">
-                {trip.collaborators.length}
-              </Text>
-              <Text className="text-xs text-muted-foreground mt-0.5">
-                {trip.collaborators.length === 1 ? 'Collaborator' : 'Collaborators'}
-              </Text>
             </View>
             <View className="flex-1 bg-primary-light rounded-xl p-4 items-center">
               <Text className="text-xl font-bold text-primary">{destinations.length}</Text>
@@ -374,6 +389,12 @@ export default function TripDetailScreen({ route, navigation }: Props) {
           </Button>
         </View>
       </ScrollView>
+      <ShareTripModal
+        visible={shareModalVisible}
+        isLoading={isSharing}
+        onShare={handleShare}
+        onCancel={() => setShareModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }

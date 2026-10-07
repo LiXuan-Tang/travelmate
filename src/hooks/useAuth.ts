@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { subscribeToAuthChanges } from '@services/firebase/auth';
-import { getDocument } from '@services/firebase/firestore';
+import { subscribeToDocument } from '@services/firebase/firestore';
 import { useAuthStore } from '@store/authStore';
 import { UserProfile } from '@app-types/index';
 import { COLLECTIONS } from '@constants/index';
@@ -9,17 +9,29 @@ export const useAuth = () => {
   const { setUser, setProfile, setLoading, reset } = useAuthStore();
 
   useEffect(() => {
-    const unsubscribe = subscribeToAuthChanges(async (firebaseUser) => {
+    let unsubscribeProfile: (() => void) | undefined;
+
+    const unsubscribeAuth = subscribeToAuthChanges((firebaseUser) => {
+      unsubscribeProfile?.();
+      unsubscribeProfile = undefined;
+
       if (firebaseUser) {
         setUser(firebaseUser);
-        const profile = await getDocument<UserProfile>(COLLECTIONS.USERS, firebaseUser.uid);
-        setProfile(profile);
+        unsubscribeProfile = subscribeToDocument<UserProfile>(
+          COLLECTIONS.USERS,
+          firebaseUser.uid,
+          (profile) => setProfile(profile),
+        );
       } else {
         reset();
       }
+
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeProfile?.();
+      unsubscribeAuth();
+    };
   }, []);
 };
